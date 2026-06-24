@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research – CCMM Lab, Thapar University</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8f7f4; --surface: #ffffff; --border: #e4e0d8;
+      --text: #1a1a1a; --muted: #6b6860; --accent: #2b5ea7;
+      --accent-lt: #e8eef7; --tag-bg: #eef2f9; --tag-txt: #2b5ea7;
+      --nav-h: 64px; --radius: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --shadow-hv: 0 6px 24px rgba(0,0,0,0.12);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: #fff; border-bottom: 1px solid var(--border);
+      height: var(--nav-h); display: flex; align-items: center;
+      padding: 0 clamp(16px, 4vw, 48px); gap: 32px;
+    }
+    .nav-logo { font-size: 16px; font-weight: 700; color: var(--accent); text-decoration: none; flex-shrink: 0; font-family: 'Merriweather', serif; }
+    .nav-logo span { color: var(--text); }
+    .nav-links { display: flex; list-style: none; margin-left: auto; }
+    .nav-links a { display: block; padding: 8px 14px; font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none; border-radius: 6px; transition: color .18s, background .18s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: var(--accent-lt); }
+    .nav-toggle { display: none; cursor: pointer; background: none; border: none; padding: 6px; }
+    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a2f5e 0%, #2b5ea7 60%, #3b7fc4 100%);
+      color: #fff; padding: clamp(56px, 8vw, 96px) clamp(16px, 4vw, 48px);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); opacity:.5;
+    }
+    .hero-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: .7; margin-bottom: 14px; position: relative; }
+    .hero h1 { font-family: 'Merriweather', serif; font-size: clamp(28px, 4.5vw, 48px); font-weight: 300; margin-bottom: 8px; position: relative; }
+    .hero h1 strong { font-weight: 700; }
+    .hero .hero-sub { font-size: clamp(13px, 1.8vw, 15px); opacity: .75; margin-bottom: 20px; position: relative; }
+    .hero p { max-width: 680px; margin: 0 auto; font-size: clamp(14px,2vw,15.5px); opacity: .85; line-height: 1.78; position: relative; }
+
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px,4vw,48px); }
+
+    .section-header { border-top: 3px solid var(--accent); padding-top: 48px; margin-top: 64px; margin-bottom: 36px; }
+    .section-header .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .section-header h2 { font-family: 'Merriweather', serif; font-size: clamp(22px,3vw,30px); font-weight: 300; color: var(--text); }
+    .section-header p { margin-top: 10px; color: var(--muted); font-size: 14px; max-width: 560px; }
+
+    /* RESEARCH AREA CARDS */
+    .research-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px; }
+    .research-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      overflow: hidden; transition: box-shadow .22s, transform .22s;
+    }
+    .research-card:hover { box-shadow: var(--shadow-hv); transform: translateY(-3px); }
+    .research-card-header {
+      background: linear-gradient(135deg, #1a2f5e, #2b5ea7);
+      padding: 24px 28px 20px;
+    }
+    .research-card-header .rc-num { font-size: 36px; font-weight: 700; color: rgba(255,255,255,0.15); font-family: 'Merriweather', serif; line-height: 1; margin-bottom: 8px; }
+    .research-card-header h3 { font-family: 'Merriweather', serif; font-size: 17px; font-weight: 400; color: #fff; line-height: 1.4; }
+    .research-card-body { padding: 24px 28px 28px; }
+    .research-card-body p { font-size: 13.5px; line-height: 1.78; color: #555; margin-bottom: 18px; }
+    .research-card-body .method-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .research-card-body .method-tags span {
+      background: var(--tag-bg); color: var(--tag-txt);
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 12px; border: 1px solid #c5d5ee;
+    }
+
+    /* ONGOING PROJECTS */
+    .project-list { display: flex; flex-direction: column; gap: 20px; }
+    .project-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 28px 32px;
+      display: grid; grid-template-columns: 4px 1fr; gap: 24px;
+    }
+    .project-bar { background: var(--accent); border-radius: 2px; }
+    .project-content h4 { font-family: 'Merriweather', serif; font-size: 17px; font-weight: 400; margin-bottom: 10px; }
+    .project-content p { font-size: 13.5px; line-height: 1.78; color: #555; margin-bottom: 14px; }
+    .project-content .ptools { display: flex; flex-wrap: wrap; gap: 6px; }
+    .project-content .ptools span {
+      background: var(--tag-bg); color: var(--tag-txt);
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 12px; border: 1px solid #c5d5ee;
+    }
+    .project-status {
+      display: inline-block; margin-bottom: 10px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 10px;
+      background: #e8f5e9; color: #2e7d32;
+    }
+
+    /* FUNDING */
+    .funding-card {
+      background: linear-gradient(135deg, #fffbea, #fef9e0);
+      border: 1px solid #f0d060; border-radius: var(--radius);
+      padding: 28px 32px; margin-bottom: 80px;
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .funding-icon { font-size: 36px; flex-shrink: 0; }
+    .funding-card h4 { font-family: 'Merriweather', serif; font-size: 17px; font-weight: 400; margin-bottom: 8px; color: #5a4500; }
+    .funding-card p { font-size: 13.5px; line-height: 1.75; color: #7a6000; }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 40px clamp(16px,4vw,48px); }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
+    .footer-brand .name { font-family: 'Merriweather', serif; font-size: 15px; color: var(--accent); font-weight: 400; margin-bottom: 6px; }
+    .footer-brand p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .footer-links h5 { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 6px; }
+    .footer-links a { font-size: 13px; color: var(--accent); text-decoration: none; }
+    .footer-links a:hover { text-decoration: underline; }
+    .footer-copy { max-width: 1100px; margin: 24px auto 0; border-top: 1px solid var(--border); padding-top: 20px; font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; flex-direction: column; position: absolute; top: var(--nav-h); left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border); padding: 12px; box-shadow: var(--shadow); }
+      .nav-links.open { display: flex; }
+      .nav-toggle { display: block; margin-left: auto; }
+      nav { position: relative; }
+      .project-card { grid-template-columns: 1fr; }
+      .project-bar { height: 4px; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">CCMM <span>Lab</span></a>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Members</a></li>
+    <li><a href="research.html" class="active">Research</a></li>
+    <li><a href="publications.html">Publications</a></li>
+    <li><a href="software.html">Software</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="positions.html">Positions</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">What We Do</div>
+  <h1><strong>Research</strong></h1>
+  <div class="hero-sub">Computational Chemistry &amp; Molecular Modelling Lab · Thapar University</div>
+  <p>We use the tools of quantum mechanics, statistical mechanics, and machine learning to understand how and why chemical reactions happen — from the electronic structure of a single metal complex to the dynamics of an entire enzyme active site.</p>
+</section>
+
+<main class="page-wrap">
+
+  <!-- RESEARCH AREAS -->
+  <div class="section-header">
+    <div class="eyebrow">Core Areas</div>
+    <h2>Research Themes</h2>
+    <p>Four interconnected pillars that define the scientific identity of the CCMM Lab.</p>
+  </div>
+
+  <div class="research-grid">
+
+    <div class="research-card">
+      <div class="research-card-header">
+        <div class="rc-num">01</div>
+        <h3>Computational Chemistry &amp; Molecular Modelling</h3>
+      </div>
+      <div class="research-card-body">
+        <p>At the heart of the lab lies the application of quantum chemical and classical simulation methods to model molecular systems at atomic resolution. Using Density Functional Theory (DFT), we probe the electronic structure, spin states, and reaction energetics of transition metal complexes — particularly high-valent metal–oxo species that are central to oxidation catalysis. Molecular Dynamics (MD) simulations extend these insights to the time domain, capturing conformational dynamics, solvation effects, and thermodynamic properties that govern real chemical behaviour. Together, these methods form a rigorous computational platform for understanding reactivity from first principles.</p>
+        <div class="method-tags">
+          <span>DFT</span><span>Molecular Dynamics</span><span>QM/MM</span><span>Metal–Oxo Complexes</span><span>Transition Metal Chemistry</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="research-card-header">
+        <div class="rc-num">02</div>
+        <h3>Theoretical Chemical Kinetics &amp; Spectroscopy</h3>
+      </div>
+      <div class="research-card-body">
+        <p>A defining focus of the lab is understanding how quantum mechanical tunneling governs hydrogen atom transfer (HAT) in C–H bond cleavage reactions — a phenomenon that classical transition state theory cannot fully describe. We investigate tunneling probability, kinetic isotope effects (KIEs), and spin-crossover behaviour in iron(IV)–oxo and related systems to reveal the true quantum mechanical nature of these reactions. Complementing this, we study the effect of oriented external electric fields (OEEFs) as a non-chemical tool to tune reaction barriers and steer selectivity, a frontier area with deep implications for electrocatalysis and molecular engineering.</p>
+        <div class="method-tags">
+          <span>Quantum Tunneling</span><span>KIE</span><span>Spin-Crossover</span><span>C–H Activation</span><span>Electric Field Catalysis</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="research-card-header">
+        <div class="rc-num">03</div>
+        <h3>Environmental Chemistry &amp; Radical Scavenging</h3>
+      </div>
+      <div class="research-card-body">
+        <p>The lab investigates the computational mechanisms by which organic compounds scavenge harmful free radicals — including hydroperoxyl (HOO·) and alkylperoxyl (CH₃OO·) radicals that play major roles in oxidative stress, atmospheric chemistry, and antioxidant activity. By mapping out hydrogen atom transfer, proton-coupled electron transfer, and radical addition pathways using DFT and kinetic modelling, we provide quantitative insight into how molecular structure dictates antioxidant potency. This work has direct relevance to the design of better antioxidant compounds and to understanding degradation processes in complex chemical environments.</p>
+        <div class="method-tags">
+          <span>Radical Scavenging</span><span>HAT Mechanism</span><span>DFT Kinetics</span><span>Antioxidants</span><span>Environmental Chemistry</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="research-card-header">
+        <div class="rc-num">04</div>
+        <h3>Bioinspired Catalyst Design, Drug Design &amp; Biomolecular Simulation</h3>
+      </div>
+      <div class="research-card-body">
+        <p>Drawing inspiration from natural metalloenzymes, we design and computationally evaluate synthetic catalysts that replicate — and potentially surpass — the efficiency and selectivity of biological systems for C–H functionalization. In parallel, the lab employs an integrated computational drug discovery pipeline: Molecular Docking screens large compound libraries against target proteins, Molecular Dynamics simulations validate binding stability under physiological conditions, Machine Learning models accelerate the prediction of bioactivity and ADMET properties, and pharmacophore filtering refines lead candidates. This end-to-end pipeline bridges quantum-level chemical insight with therapeutically relevant biological systems.</p>
+        <div class="method-tags">
+          <span>Bioinspired Catalysis</span><span>Molecular Docking</span><span>MD Simulation</span><span>Machine Learning</span><span>Drug Design</span><span>ADMET</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ONGOING PROJECTS -->
+  <div class="section-header">
+    <div class="eyebrow">Active Work</div>
+    <h2>Ongoing Projects</h2>
+    <p>Current research efforts being actively pursued by the CCMM Lab team.</p>
+  </div>
+
+  <div class="project-list">
+
+    <div class="project-card">
+      <div class="project-bar"></div>
+      <div class="project-content">
+        <span class="project-status">● Active</span>
+        <h4>Metal–Oxo C–H Activation: DFT Mechanistic Studies</h4>
+        <p>This project investigates the electronic structure and reactivity of high-valent metal–oxo intermediates in C–H bond activation reactions using Density Functional Theory. The work examines how the metal identity, oxidation state, spin state, and ligand environment collectively determine the barrier to hydrogen atom transfer and the degree of quantum tunneling contribution. Ongoing studies focus on Fe(IV)–oxo complexes with macrocyclic, porphyrinoid, and carboxylate-supported ligand frameworks, building a systematic understanding of how ligand architecture tunes reactivity and providing design principles for next-generation bioinspired oxidation catalysts.</p>
+        <div class="ptools">
+          <span>DFT</span><span>Gaussian16</span><span>ORCA</span><span>Turbomole</span><span>Spin-State Analysis</span><span>Potential Energy Surfaces</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-bar"></div>
+      <div class="project-content">
+        <span class="project-status">● Active</span>
+        <h4>Enzyme Catalysis: Integrated MD, Docking, ML &amp; QM/MM Pipeline</h4>
+        <p>This project employs a comprehensive multi-scale computational pipeline to study enzyme-catalyzed reactions and identify novel bioactive compounds. The workflow begins with large-scale virtual screening via Molecular Docking (AutoDock-GPU) to identify candidate molecules from chemical libraries. Promising hits are subjected to Molecular Dynamics simulations (AMBER24, GROMACS, NAMD) to assess binding stability, conformational flexibility, and free energetics under physiological conditions. Machine learning models trained on quantum chemical descriptors are used to filter and prioritize candidates based on predicted bioactivity and ADMET profiles. For the most promising systems, QM/MM calculations using ChemShell provide atomistic quantum mechanical detail on the catalytic mechanism within the full enzyme environment.</p>
+        <div class="ptools">
+          <span>AutoDock-GPU</span><span>AMBER24</span><span>GROMACS</span><span>NAMD</span><span>ChemShell</span><span>Machine Learning</span><span>QM/MM</span><span>ADMET Filtering</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FUNDING -->
+  <div class="section-header">
+    <div class="eyebrow">Support</div>
+    <h2>Funding</h2>
+  </div>
+  <div class="funding-card" style="margin-bottom: 80px;">
+    <div class="funding-icon">🏛️</div>
+    <div>
+      <h4>DST INSPIRE Faculty Grant</h4>
+      <p>The CCMM Lab's research on QM/MM and QM investigations of enzyme and synthetic compound catalyzed C–H activation, drug metabolism, and the impact of quantum mechanical tunneling is supported by the Department of Science &amp; Technology (DST) INSPIRE Faculty Grant (DST/INSPIRE/04/2016/001948), sanctioned for the period 2017–2022, amounting to ₹35 Lakhs.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="name">Computational Chemistry &amp; Molecular Modelling Lab</div>
+      <p>Department of Chemistry &amp; Biochemistry<br>Thapar Institute of Engineering &amp; Technology<br>Patiala, Punjab — 147004, India</p>
+    </div>
+    <div class="footer-links">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="index.html">Members</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h5>Connect</h5>
+      <ul>
+        <li><a href="#">Google Scholar</a></li>
+        <li><a href="#">ResearchGate</a></li>
+        <li><a href="https://orcid.org/0000-0002-9452-6729" target="_blank">ORCID</a></li>
+        <li><a href="#">Thapar University</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-copy">© 2026 Computational Chemistry &amp; Molecular Modelling Lab, Thapar University. All Rights Reserved.</div>
+</footer>
+<script>
+  document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+</script>
+</body>
+</html>

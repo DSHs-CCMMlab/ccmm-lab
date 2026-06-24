@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery – CCMM Lab, Thapar University</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8f7f4; --surface: #ffffff; --border: #e4e0d8;
+      --text: #1a1a1a; --muted: #6b6860; --accent: #2b5ea7;
+      --accent-lt: #e8eef7; --nav-h: 64px; --radius: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --shadow-hv: 0 6px 24px rgba(0,0,0,0.13);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--border); height: var(--nav-h); display: flex; align-items: center; padding: 0 clamp(16px,4vw,48px); gap: 32px; }
+    .nav-logo { font-size: 16px; font-weight: 700; color: var(--accent); text-decoration: none; flex-shrink: 0; font-family: 'Merriweather', serif; }
+    .nav-logo span { color: var(--text); }
+    .nav-links { display: flex; list-style: none; margin-left: auto; }
+    .nav-links a { display: block; padding: 8px 14px; font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none; border-radius: 6px; transition: color .18s, background .18s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: var(--accent-lt); }
+    .nav-toggle { display: none; cursor: pointer; background: none; border: none; padding: 6px; }
+    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; }
+
+    .hero { background: linear-gradient(135deg, #1a2f5e 0%, #2b5ea7 60%, #3b7fc4 100%); color: #fff; padding: clamp(56px,8vw,96px) clamp(16px,4vw,48px); text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); opacity:.5; }
+    .hero-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: .7; margin-bottom: 14px; position: relative; }
+    .hero h1 { font-family: 'Merriweather', serif; font-size: clamp(28px,4.5vw,48px); font-weight: 300; margin-bottom: 8px; position: relative; }
+    .hero h1 strong { font-weight: 700; }
+    .hero .hero-sub { font-size: clamp(13px,1.8vw,15px); opacity:.75; position: relative; }
+
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px,4vw,48px); }
+
+    .section-header { border-top: 3px solid var(--accent); padding-top: 48px; margin-top: 64px; margin-bottom: 36px; }
+    .section-header .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .section-header h2 { font-family: 'Merriweather', serif; font-size: clamp(22px,3vw,30px); font-weight: 300; color: var(--text); }
+    .section-header p { margin-top: 10px; color: var(--muted); font-size: 14px; }
+
+    /* GALLERY GRID */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .gallery-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: box-shadow .22s, transform .22s;
+      cursor: pointer;
+    }
+    .gallery-item:hover { box-shadow: var(--shadow-hv); transform: translateY(-3px); }
+    .gallery-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+    .gallery-placeholder {
+      width: 100%; aspect-ratio: 4/3;
+      background: linear-gradient(145deg, #c8d8ee, #dde8f5);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    }
+    .gallery-placeholder .ph-icon { font-size: 36px; opacity: .4; }
+    .gallery-placeholder .ph-text { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .gallery-caption { padding: 12px 14px; }
+    .gallery-caption .gc-title { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+    .gallery-caption .gc-date { font-size: 12px; color: var(--muted); }
+
+    /* UPLOAD INSTRUCTIONS */
+    .upload-box {
+      background: var(--accent-lt);
+      border: 2px dashed #a0bce0;
+      border-radius: var(--radius);
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 80px;
+    }
+    .upload-box .ub-icon { font-size: 40px; margin-bottom: 12px; }
+    .upload-box h4 { font-family: 'Merriweather', serif; font-size: 18px; font-weight: 400; color: var(--accent); margin-bottom: 10px; }
+    .upload-box p { font-size: 13.5px; color: var(--muted); max-width: 500px; margin: 0 auto; line-height: 1.75; }
+    .upload-box code { background: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12.5px; color: var(--accent); border: 1px solid var(--border); }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 40px clamp(16px,4vw,48px); }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
+    .footer-brand .name { font-family: 'Merriweather', serif; font-size: 15px; color: var(--accent); font-weight: 400; margin-bottom: 6px; }
+    .footer-brand p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .footer-links h5 { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 6px; }
+    .footer-links a { font-size: 13px; color: var(--accent); text-decoration: none; }
+    .footer-copy { max-width: 1100px; margin: 24px auto 0; border-top: 1px solid var(--border); padding-top: 20px; font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; flex-direction: column; position: absolute; top: var(--nav-h); left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border); padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.07); }
+      .nav-links.open { display: flex; }
+      .nav-toggle { display: block; margin-left: auto; }
+      nav { position: relative; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">CCMM <span>Lab</span></a>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Members</a></li>
+    <li><a href="research.html">Research</a></li>
+    <li><a href="publications.html">Publications</a></li>
+    <li><a href="software.html">Software</a></li>
+    <li><a href="gallery.html" class="active">Gallery</a></li>
+    <li><a href="positions.html">Positions</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Lab Life</div>
+  <h1><strong>Gallery</strong></h1>
+  <div class="hero-sub">Computational Chemistry &amp; Molecular Modelling Lab · Thapar University</div>
+</section>
+
+<main class="page-wrap">
+
+  <div class="section-header">
+    <div class="eyebrow">Lab Life</div>
+    <h2>Photos &amp; Events</h2>
+    <p>Conferences, lab meetings, celebrations, and moments from the CCMM Lab.</p>
+  </div>
+
+  <!-- PLACEHOLDER GRID — replace with real images -->
+  <div class="gallery-grid">
+
+    <div class="gallery-item">
+      <div class="gallery-placeholder"><div class="ph-icon">🖼️</div><div class="ph-text">Add photo here</div></div>
+      <div class="gallery-caption"><div class="gc-title">Lab Meeting / Group Photo</div><div class="gc-date">Year</div></div>
+    </div>
+
+    <div class="gallery-item">
+      <div class="gallery-placeholder"><div class="ph-icon">🖼️</div><div class="ph-text">Add photo here</div></div>
+      <div class="gallery-caption"><div class="gc-title">Conference Presentation</div><div class="gc-date">Year</div></div>
+    </div>
+
+    <div class="gallery-item">
+      <div class="gallery-placeholder"><div class="ph-icon">🖼️</div><div class="ph-text">Add photo here</div></div>
+      <div class="gallery-caption"><div class="gc-title">Workshop / Seminar</div><div class="gc-date">Year</div></div>
+    </div>
+
+    <div class="gallery-item">
+      <div class="gallery-placeholder"><div class="ph-icon">🖼️</div><div class="ph-text">Add photo here</div></div>
+      <div class="gallery-caption"><div class="gc-title">Thesis Defence Celebration</div><div class="gc-date">Year</div></div>
+    </div>
+
+    <div class="gallery-item">
+      <div class="gallery-placeholder"><div class="ph-icon">🖼️</div><div class="ph-text">Add photo here</div></div>
+      <div class="gallery-caption"><div class="gc-title">Lab Outing</div><div class="gc-date">Year</div></div>
+    </div>
+
+    <div class="gallery-item">
+      <div class="gallery-placeholder"><div class="ph-icon">🖼️</div><div class="ph-text">Add photo here</div></div>
+      <div class="gallery-caption"><div class="gc-title">Research Poster Presentation</div><div class="gc-date">Year</div></div>
+    </div>
+
+  </div>
+
+  <!-- HOW TO ADD IMAGES -->
+  <div class="upload-box">
+    <div class="ub-icon">📁</div>
+    <h4>How to Add Your Photos</h4>
+    <p>
+      Upload your image files (JPG/PNG) to your GitHub repository in the same folder as these HTML files.
+      Then in this file, replace each <code>&lt;div class="gallery-placeholder"&gt;</code> block with:<br><br>
+      <code>&lt;img src="your-photo.jpg" alt="Description"&gt;</code><br><br>
+      And update the caption title and date below each photo.
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="name">Computational Chemistry &amp; Molecular Modelling Lab</div>
+      <p>Department of Chemistry &amp; Biochemistry<br>Thapar Institute of Engineering &amp; Technology<br>Patiala, Punjab — 147004, India</p>
+    </div>
+    <div class="footer-links">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="index.html">Members</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h5>Connect</h5>
+      <ul>
+        <li><a href="#">Google Scholar</a></li>
+        <li><a href="#">ResearchGate</a></li>
+        <li><a href="https://orcid.org/0000-0002-9452-6729" target="_blank">ORCID</a></li>
+        <li><a href="#">Thapar University</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-copy">© 2026 Computational Chemistry &amp; Molecular Modelling Lab, Thapar University. All Rights Reserved.</div>
+</footer>
+<script>
+  document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+</script>
+</body>
+</html>

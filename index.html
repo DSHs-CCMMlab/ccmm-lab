@@ -1,1 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Members – CCMM Lab, Thapar University</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg:        #f8f7f4;
+      --surface:   #ffffff;
+      --border:    #e4e0d8;
+      --text:      #1a1a1a;
+      --muted:     #6b6860;
+      --accent:    #2b5ea7;
+      --accent-lt: #e8eef7;
+      --tag-bg:    #eef2f9;
+      --tag-txt:   #2b5ea7;
+      --nav-bg:    #ffffff;
+      --nav-h:     64px;
+      --radius:    8px;
+      --shadow:    0 2px 12px rgba(0,0,0,0.07);
+      --shadow-hv: 0 6px 24px rgba(0,0,0,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--border);
+      height: var(--nav-h);
+      display: flex; align-items: center;
+      padding: 0 clamp(16px, 4vw, 48px);
+      gap: 32px;
+    }
+    .nav-logo {
+      font-size: 16px; font-weight: 700; letter-spacing: -0.4px;
+      color: var(--accent); text-decoration: none; flex-shrink: 0;
+      font-family: 'Merriweather', serif; line-height: 1.2;
+    }
+    .nav-logo span { color: var(--text); }
+    .nav-links { display: flex; gap: 0; list-style: none; margin-left: auto; }
+    .nav-links a {
+      display: block; padding: 8px 14px;
+      font-size: 13.5px; font-weight: 500; color: var(--muted);
+      text-decoration: none; border-radius: 6px;
+      transition: color .18s, background .18s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: var(--accent-lt); }
+    .nav-toggle { display: none; cursor: pointer; background: none; border: none; padding: 6px; }
+    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1a2f5e 0%, #2b5ea7 60%, #3b7fc4 100%);
+      color: #fff;
+      padding: clamp(56px, 8vw, 96px) clamp(16px, 4vw, 48px);
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: .5;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+      margin-bottom: 18px; position: relative;
+    }
+    .hero-badge .star { color: #ffd700; font-size: 14px; }
+    .hero-eyebrow {
+      font-size: 12px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; opacity: .7; margin-bottom: 14px;
+      position: relative;
+    }
+    .hero h1 {
+      font-family: 'Merriweather', serif;
+      font-size: clamp(28px, 4.5vw, 48px);
+      font-weight: 300; letter-spacing: -0.5px;
+      margin-bottom: 8px; position: relative;
+    }
+    .hero h1 strong { font-weight: 700; }
+    .hero .hero-sub {
+      font-size: clamp(13px, 1.8vw, 15px); opacity: .75;
+      margin-bottom: 20px; position: relative;
+      letter-spacing: 0.5px;
+    }
+    .hero p {
+      max-width: 680px; margin: 0 auto;
+      font-size: clamp(14px, 2vw, 15.5px); opacity: .85;
+      line-height: 1.78; position: relative;
+    }
+
+    /* MAIN */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 48px); }
+
+    /* SECTION HEADERS */
+    .section-header {
+      border-top: 3px solid var(--accent);
+      padding-top: 48px; margin-top: 64px; margin-bottom: 36px;
+    }
+    .section-header .eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+    }
+    .section-header h2 {
+      font-family: 'Merriweather', serif;
+      font-size: clamp(22px, 3vw, 30px); font-weight: 300;
+      letter-spacing: -0.3px; color: var(--text);
+    }
+    .section-header p { margin-top: 10px; color: var(--muted); font-size: 14px; max-width: 560px; }
+
+    /* PI CARD */
+    .pi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      overflow: hidden;
+    }
+    .pi-photo-wrap { background: var(--accent-lt); display: flex; align-items: stretch; }
+    .pi-photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pi-photo-placeholder {
+      width: 100%; min-height: 300px;
+      background: linear-gradient(145deg, #c8d8ee, #dde8f5);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pi-photo-placeholder svg { opacity: .28; }
+    .pi-info { padding: 36px 40px; }
+    .pi-info .role-tag {
+      display: inline-block;
+      background: var(--tag-bg); color: var(--tag-txt);
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 4px 10px;
+      border-radius: 4px; margin-bottom: 16px;
+    }
+    .pi-info h3 {
+      font-family: 'Merriweather', serif;
+      font-size: clamp(20px, 2.5vw, 26px); font-weight: 400;
+      letter-spacing: -0.3px; margin-bottom: 4px;
+    }
+    .pi-info .title { font-size: 13.5px; color: var(--accent); font-weight: 500; margin-bottom: 6px; }
+    .pi-info .pi-meta {
+      font-size: 12.5px; color: var(--muted); margin-bottom: 18px; line-height: 1.6;
+    }
+    .pi-info .pi-meta span { margin-right: 16px; }
+    .pi-research-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .pi-research-tags .rtag {
+      background: var(--tag-bg); color: var(--tag-txt);
+      font-size: 12px; font-weight: 500; padding: 4px 12px;
+      border-radius: 20px; border: 1px solid #c5d5ee;
+    }
+    .pi-info .bio { font-size: 14px; line-height: 1.82; color: #444; margin-bottom: 22px; }
+    .pi-achievement {
+      background: linear-gradient(135deg, #fffbea, #fef9e0);
+      border: 1px solid #f0d060;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px; color: #7a6000;
+      margin-bottom: 22px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pi-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pi-links a {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--border);
+      font-size: 12.5px; font-weight: 500; color: var(--accent);
+      text-decoration: none; transition: all .18s;
+    }
+    .pi-links a:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* MEMBER GRID */
+    .member-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .member-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: box-shadow .22s, transform .22s;
+    }
+    .member-card:hover { box-shadow: var(--shadow-hv); transform: translateY(-3px); }
+    .member-photo-placeholder {
+      width: 100%; aspect-ratio: 4/3;
+      background: linear-gradient(145deg, #c8d8ee, #dde8f5);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .member-photo-placeholder svg { opacity: .28; }
+    .member-body { padding: 20px 22px 22px; flex: 1; display: flex; flex-direction: column; }
+    .member-role {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 8px; line-height: 1.4;
+    }
+    .member-name {
+      font-family: 'Merriweather', serif;
+      font-size: 17px; font-weight: 400; margin-bottom: 12px;
+      letter-spacing: -0.2px;
+    }
+    .member-bio { font-size: 13.5px; line-height: 1.75; color: #555; flex: 1; }
+    .member-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .member-tags .mtag {
+      background: var(--tag-bg); color: var(--tag-txt);
+      font-size: 11px; font-weight: 500; padding: 3px 9px;
+      border-radius: 12px; border: 1px solid #c5d5ee;
+    }
+    /* Member links — same style as PI */
+    .member-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .member-links a {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 20px;
+      border: 1px solid var(--border);
+      font-size: 12px; font-weight: 500; color: var(--accent);
+      text-decoration: none; transition: all .18s;
+    }
+    .member-links a:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ALUMNI */
+    .alumni-subsection { margin-bottom: 40px; }
+    .alumni-subsection h4 {
+      font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px; margin-bottom: 20px;
+    }
+    .alumni-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .alumni-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .alumni-avatar-placeholder {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(145deg, #c8d8ee, #dde8f5);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .alumni-avatar-placeholder svg { opacity: .3; }
+    .alumni-info { min-width: 0; }
+    .alumni-name { font-weight: 600; font-size: 14.5px; margin-bottom: 3px; }
+    .alumni-role { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+    .alumni-thesis {
+      font-size: 12px; color: #444; margin-top: 6px;
+      line-height: 1.55; font-style: italic;
+      border-left: 2px solid var(--accent); padding-left: 8px;
+    }
+    .alumni-status {
+      display: inline-block; margin-top: 6px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+      padding: 2px 8px; border-radius: 10px;
+    }
+    .alumni-status.awarded { background: #e8f5e9; color: #2e7d32; }
+    .alumni-status.submitted { background: #fff8e1; color: #f57f17; }
+
+    /* RESEARCH HIGHLIGHTS */
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .highlight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+    }
+    .highlight-card .hc-num {
+      font-size: 28px; font-weight: 700; color: var(--accent);
+      font-family: 'Merriweather', serif; margin-bottom: 6px; opacity: .25;
+    }
+    .highlight-card h4 { font-size: 14.5px; font-weight: 600; margin-bottom: 8px; }
+    .highlight-card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+    /* JOIN STRIP */
+    .join-strip {
+      margin: 64px 0 80px;
+      background: linear-gradient(135deg, #1a2f5e 0%, #2b5ea7 100%);
+      border-radius: 12px;
+      padding: 48px 40px;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      flex-wrap: wrap;
+    }
+    .join-strip h3 {
+      font-family: 'Merriweather', serif;
+      font-size: clamp(18px, 2.5vw, 24px); font-weight: 300;
+      color: #fff; margin-bottom: 8px;
+    }
+    .join-strip p { color: rgba(255,255,255,.75); font-size: 14px; max-width: 440px; }
+    .btn-join {
+      display: inline-block; padding: 12px 28px;
+      background: #fff; color: var(--accent);
+      font-weight: 700; font-size: 14px;
+      border-radius: 6px; text-decoration: none;
+      white-space: nowrap; transition: all .18s;
+    }
+    .btn-join:hover { background: var(--accent-lt); }
+
+    /* FOOTER */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 40px clamp(16px, 4vw, 48px);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 32px; flex-wrap: wrap;
+    }
+    .footer-brand .name {
+      font-family: 'Merriweather', serif;
+      font-size: 15px; color: var(--accent); font-weight: 400; margin-bottom: 6px;
+    }
+    .footer-brand p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .footer-links h5 {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 6px; }
+    .footer-links a { font-size: 13px; color: var(--accent); text-decoration: none; }
+    .footer-links a:hover { text-decoration: underline; }
+    .footer-copy {
+      max-width: 1100px; margin: 24px auto 0;
+      border-top: 1px solid var(--border); padding-top: 20px;
+      font-size: 12px; color: var(--muted);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .pi-card { grid-template-columns: 1fr; }
+      .pi-photo-placeholder { min-height: 200px; }
+      .nav-links {
+        display: none; flex-direction: column; position: absolute;
+        top: var(--nav-h); left: 0; right: 0;
+        background: var(--nav-bg); border-bottom: 1px solid var(--border);
+        padding: 12px; gap: 4px; box-shadow: var(--shadow);
+      }
+      .nav-links.open { display: flex; }
+      .nav-toggle { display: block; margin-left: auto; }
+      nav { position: relative; }
+      .join-strip { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">CCMM <span>Lab</span></a>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html" class="active">Members</a></li>
+    <li><a href="research.html">Research</a></li>
+    <li><a href="publications.html">Publications</a></li>
+    <li><a href="software.html">Software</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="positions.html">Positions</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="star">★</span> Ranked in World's Top 2% Scientists — Elsevier / Stanford, 2024
+  </div>
+  <div class="hero-eyebrow">Our Team</div>
+  <h1><strong>Computational Chemistry</strong> &amp; Molecular Modelling Lab</h1>
+  <div class="hero-sub">Department of Chemistry &amp; Biochemistry &nbsp;·&nbsp; Thapar Institute of Engineering &amp; Technology, Patiala</div>
+  <p>We investigate the novel insights behind chemical driving forces, reaction mechanisms, and drug design — combining quantum mechanics, molecular simulation, and machine learning to tackle problems at the frontier of chemistry and biology.</p>
+</section>
+
+<!-- MAIN -->
+<main class="page-wrap">
+
+  <!-- PI -->
+  <div class="section-header">
+    <div class="eyebrow">Principal Investigator</div>
+    <h2>Lab Director</h2>
+  </div>
+
+  <div class="pi-card">
+    <div class="pi-photo-wrap">
+      <div class="pi-photo-placeholder">
+        <!-- Replace with: <img src="debashish-mandal.jpg" alt="Dr. Debashish Mandal"> -->
+        <svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1">
+          <circle cx="12" cy="8" r="4.5"/>
+          <path d="M3 21c0-4.5 4-8 9-8s9 3.5 9 8"/>
+        </svg>
+      </div>
+    </div>
+    <div class="pi-info">
+      <span class="role-tag">Principal Investigator</span>
+      <h3>Dr. Debashish Mandal</h3>
+      <div class="title">Associate Professor &nbsp;·&nbsp; Department of Chemistry &amp; Biochemistry &nbsp;·&nbsp; Thapar Institute of Engineering &amp; Technology</div>
+      <div class="pi-meta">
+        <span>🎓 PhD, IACS Kolkata (2009–2013)</span>
+        <span>🔬 Post-doc, Hebrew University of Jerusalem (2013–2017)</span>
+        <span>📊 H-Index: 28</span>
+        <span>🆔 ORCID: 0000-0002-9452-6729</span>
+      </div>
+
+      <div class="pi-research-tags">
+        <span class="rtag">Density Functional Theory</span>
+        <span class="rtag">Machine Learning</span>
+        <span class="rtag">Molecular Docking</span>
+        <span class="rtag">Molecular Dynamics</span>
+        <span class="rtag">QM/MM</span>
+        <span class="rtag">Quantum Tunneling</span>
+        <span class="rtag">C–H Activation</span>
+      </div>
+
+      <div class="pi-achievement">
+        ⭐ Ranked in the <strong>World's Top 2% Scientists</strong> by Elsevier / Stanford University
+      </div>
+
+      <p class="bio">
+        Dr. Debashish Mandal leads the Computational Chemistry &amp; Molecular Modelling (CCMM) Lab at Thapar University. His research uncovers the quantum mechanical driving forces behind chemical reactivity — with a particular focus on tunneling-controlled C–H activation, the influence of oriented external electric fields on catalysis, and structure-based drug development. Using Density Functional Theory (DFT), he investigates the electronic structure and spin states of high-valent metal–oxo and transition metal complexes, revealing how subtle changes in ligand architecture dramatically alter oxidative reactivity. His group further integrates Machine Learning to accelerate property prediction across large chemical datasets, and employs Molecular Docking alongside QM/MM simulations to bridge quantum-level insights with biological targets — enabling the rational design of therapeutically relevant compounds. This research is supported by a DST INSPIRE Faculty Grant and has resulted in publications across top-tier journals including <em>Dalton Transactions</em>, <em>Inorganic Chemistry</em>, <em>Biomacromolecules</em>, and <em>Journal of Organic Chemistry</em>.
+      </p>
+
+      <div class="pi-links">
+        <a href="#">📚 Google Scholar</a>
+        <a href="#">🔬 ResearchGate</a>
+        <a href="https://orcid.org/0000-0002-9452-6729" target="_blank">🆔 ORCID</a>
+        <a href="#">🏛️ Thapar Profile</a>
+        <a href="#">✉️ Email</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURRENT MEMBERS -->
+  <div class="section-header">
+    <div class="eyebrow">Current Members</div>
+    <h2>PhD Scholars</h2>
+    <p>Graduate researchers actively pursuing their doctoral work across quantum chemistry, molecular simulation, and machine learning at CCMM Lab.</p>
+  </div>
+
+  <div class="member-grid">
+
+    <!-- Shubham Jain -->
+    <div class="member-card">
+      <div class="member-photo-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.1">
+          <circle cx="12" cy="8" r="4.5"/>
+          <path d="M3 21c0-4.5 4-8 9-8s9 3.5 9 8"/>
+        </svg>
+      </div>
+      <div class="member-body">
+        <div class="member-role">JRF · PhD Scholar</div>
+        <div class="member-name">Shubham Jain</div>
+        <div class="member-bio">
+          Shubham pursues a broad multi-scale research approach within the lab. His work combines Molecular Dynamics simulations to capture real-time conformational and thermodynamic behavior, Molecular Docking to map how small molecules bind to biological targets, and Machine Learning models to extract structure–property relationships from large chemical datasets. At the most fundamental level, he applies QM/MM methods to accurately describe quantum-level reactivity at active sites embedded within a classical environment — making his toolkit one of the most integrative in the group.
+        </div>
+        <div class="member-tags">
+          <span class="mtag">MD</span>
+          <span class="mtag">Molecular Docking</span>
+          <span class="mtag">ML</span>
+          <span class="mtag">QM/MM</span>
+        </div>
+        <div class="member-links">
+          <a href="#">✉️ Email</a>
+          <a href="#">📚 Scholar</a>
+          <a href="#">🆔 ORCID</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timir Naskar -->
+    <div class="member-card">
+      <div class="member-photo-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.1">
+          <circle cx="12" cy="8" r="4.5"/>
+          <path d="M3 21c0-4.5 4-8 9-8s9 3.5 9 8"/>
+        </svg>
+      </div>
+      <div class="member-body">
+        <div class="member-role">PhD Scholar</div>
+        <div class="member-name">Timir Naskar</div>
+        <div class="member-bio">
+          Timir takes a comprehensive multi-method approach to chemical research. He uses DFT to understand electronic structure and reaction energetics, Molecular Dynamics to study conformational dynamics and thermodynamic properties, and AI/ML techniques to build predictive models from quantum chemical data. His work also incorporates Molecular Docking to investigate binding interactions with biological targets — making him well-positioned to tackle problems that span both fundamental quantum chemistry and applied molecular recognition.
+        </div>
+        <div class="member-tags">
+          <span class="mtag">DFT</span>
+          <span class="mtag">MD</span>
+          <span class="mtag">AI/ML</span>
+          <span class="mtag">Docking</span>
+        </div>
+        <div class="member-links">
+          <a href="#">✉️ Email</a>
+          <a href="#">📚 Scholar</a>
+          <a href="#">🆔 ORCID</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Priyanka -->
+    <div class="member-card">
+      <div class="member-photo-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.1">
+          <circle cx="12" cy="8" r="4.5"/>
+          <path d="M3 21c0-4.5 4-8 9-8s9 3.5 9 8"/>
+        </svg>
+      </div>
+      <div class="member-body">
+        <div class="member-role">JRF · PhD Scholar</div>
+        <div class="member-name">Priyanka</div>
+        <div class="member-bio">
+          Priyanka's doctoral research is focused on the computational investigation of metal–oxo complexes using Density Functional Theory. Metal–oxo species are highly reactive intermediates central to oxidation catalysis, and her DFT studies probe their electronic structure, spin states, and reaction mechanisms at the quantum level. By mapping out potential energy surfaces and locating key transition states, her work provides atomic-scale insight into how these reactive species form and function in both synthetic and enzymatic contexts.
+        </div>
+        <div class="member-tags">
+          <span class="mtag">DFT</span>
+          <span class="mtag">Metal–Oxo</span>
+          <span class="mtag">Reaction Mechanisms</span>
+        </div>
+        <div class="member-links">
+          <a href="#">✉️ Email</a>
+          <a href="#">📚 Scholar</a>
+          <a href="#">🆔 ORCID</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vishvendra Raj -->
+    <div class="member-card">
+      <div class="member-photo-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.1">
+          <circle cx="12" cy="8" r="4.5"/>
+          <path d="M3 21c0-4.5 4-8 9-8s9 3.5 9 8"/>
+        </svg>
+      </div>
+      <div class="member-body">
+        <div class="member-role">PhD Scholar</div>
+        <div class="member-name">Vishvendra Raj</div>
+        <div class="member-bio">
+          Vishvendra applies DFT to investigate how the metal center identity, oxidation state, and surrounding ligand environment collectively govern the reactivity of metal–oxo complexes. His calculations explore potential energy surfaces and electronic properties of these high-valent species, contributing to a deeper understanding of catalytic oxidation pathways. His work aims to provide theoretical guidance for the rational design of more efficient and selective metal-based catalysts for C–H activation.
+        </div>
+        <div class="member-tags">
+          <span class="mtag">DFT</span>
+          <span class="mtag">Metal–Oxo</span>
+          <span class="mtag">C–H Activation</span>
+        </div>
+        <div class="member-links">
+          <a href="#">✉️ Email</a>
+          <a href="#">📚 Scholar</a>
+          <a href="#">🆔 ORCID</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Harshita -->
+    <div class="member-card">
+      <div class="member-photo-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.1">
+          <circle cx="12" cy="8" r="4.5"/>
+          <path d="M3 21c0-4.5 4-8 9-8s9 3.5 9 8"/>
+        </svg>
+      </div>
+      <div class="member-body">
+        <div class="member-role">PhD Scholar</div>
+        <div class="member-name">Harshita</div>
+        <div class="member-bio">
+          Harshita's research centers on the quantum chemical characterization of metal–oxo complexes through DFT, with an emphasis on how spin state, electronic configuration, and ligand architecture influence oxidative reactivity. By performing detailed electronic structure analyses and mechanistic studies, her work bridges theoretical predictions with experimental observations — shedding light on how metal–oxo intermediates carry out challenging chemical transformations in synthetic and biological catalysis.
+        </div>
+        <div class="member-tags">
+          <span class="mtag">DFT</span>
+          <span class="mtag">Metal–Oxo</span>
+          <span class="mtag">Electronic Structure</span>
+        </div>
+        <div class="member-links">
+          <a href="#">✉️ Email</a>
+          <a href="#">📚 Scholar</a>
+          <a href="#">🆔 ORCID</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amanpreet Kaur -->
+    <div class="member-card">
+      <div class="member-photo-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.1">
+          <circle cx="12" cy="8" r="4.5"/>
+          <path d="M3 21c0-4.5 4-8 9-8s9 3.5 9 8"/>
+        </svg>
+      </div>
+      <div class="member-body">
+        <div class="member-role">PhD Scholar</div>
+        <div class="member-name">Amanpreet Kaur</div>
+        <div class="member-bio">
+          Amanpreet's research is rooted in computational investigations of transition metal chemistry using Density Functional Theory. Her work explores the electronic structure and reactivity of metal complexes, examining how key properties such as spin state, redox behavior, and ligand coordination influence catalytic outcomes. Her studies contribute to the lab's broader effort to understand and predict the behaviour of reactive metal intermediates in oxidation and C–H functionalization reactions.
+        </div>
+        <div class="member-tags">
+          <span class="mtag">DFT</span>
+          <span class="mtag">Transition Metal Chemistry</span>
+          <span class="mtag">Catalysis</span>
+        </div>
+        <div class="member-links">
+          <a href="#">✉️ Email</a>
+          <a href="#">📚 Scholar</a>
+          <a href="#">🆔 ORCID</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /member-grid -->
+
+  <!-- RESEARCH HIGHLIGHTS -->
+  <div class="section-header">
+    <div class="eyebrow">Research Focus</div>
+    <h2>Core Areas</h2>
+    <p>Three interconnected themes that define the lab's scientific identity.</p>
+  </div>
+
+  <div class="highlights-grid">
+    <div class="highlight-card">
+      <div class="hc-num">01</div>
+      <h4>Tunneling-Controlled C–H Activation</h4>
+      <p>Investigating how quantum mechanical tunneling governs hydrogen atom transfer in C–H bond cleavage, particularly in Fe(IV)–oxo and related high-valent transition metal systems. Tunneling probability, spin-inversion, and kinetic isotope effects are central to this work.</p>
+    </div>
+    <div class="highlight-card">
+      <div class="hc-num">02</div>
+      <h4>Oriented External Electric Fields in Catalysis</h4>
+      <p>Exploring how externally applied electric fields can be used as a "reagent" to tune reaction barriers, shift transition states, and steer chemical selectivity — a frontier area with implications for electrocatalysis and molecular machines.</p>
+    </div>
+    <div class="highlight-card">
+      <div class="hc-num">03</div>
+      <h4>Drug Design &amp; Biomolecular Simulation</h4>
+      <p>Using Molecular Docking, QM/MM, and MD simulations to investigate enzyme mechanisms and computationally design bioactive molecules, bridging quantum-level chemical insight with therapeutically relevant biological targets.</p>
+    </div>
+  </div>
+
+  <!-- ALUMNI -->
+  <div class="section-header">
+    <div class="eyebrow">Alumni</div>
+    <h2>Past Members</h2>
+    <p>Former lab members who have contributed significantly to the CCMM Lab's research and gone on to pursue careers in science.</p>
+  </div>
+
+  <div class="alumni-subsection">
+    <h4>PhD Scholars — Thesis Awarded</h4>
+    <div class="alumni-grid">
+
+      <div class="alumni-card">
+        <div class="alumni-avatar-placeholder">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.5">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <div class="alumni-info">
+          <div class="alumni-name">Lovleen Kaur</div>
+          <div class="alumni-role">PhD Scholar</div>
+          <span class="alumni-status awarded">Thesis Awarded</span>
+          <div class="alumni-thesis">Computational study of the role of coordinated ligand architecture on the oxidation reactions catalyzed by transition metal-based complexes</div>
+        </div>
+      </div>
+
+      <div class="alumni-card">
+        <div class="alumni-avatar-placeholder">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.5">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <div class="alumni-info">
+          <div class="alumni-name">Akanksha Katoch</div>
+          <div class="alumni-role">PhD Scholar</div>
+          <span class="alumni-status awarded">Thesis Awarded</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="alumni-subsection">
+    <h4>PhD Scholars — Thesis Submitted</h4>
+    <div class="alumni-grid">
+
+      <div class="alumni-card">
+        <div class="alumni-avatar-placeholder">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2b5ea7" stroke-width="1.5">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <div class="alumni-info">
+          <div class="alumni-name">Chhinderpal Kaur</div>
+          <div class="alumni-role">PhD Scholar</div>
+          <span class="alumni-status submitted">Thesis Submitted</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JOIN STRIP -->
+  <div class="join-strip">
+    <div>
+      <h3>Interested in joining the CCMM Lab?</h3>
+      <p>We welcome motivated PhD applicants and project students with backgrounds in chemistry, physics, or computer science. Positions in computational chemistry, ML for chemistry, and molecular simulation are available. Funding through DST INSPIRE and other schemes.</p>
+    </div>
+    <a class="btn-join" href="positions.html">See Open Positions →</a>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="name">Computational Chemistry &amp; Molecular Modelling Lab</div>
+      <p>Department of Chemistry &amp; Biochemistry<br>Thapar Institute of Engineering &amp; Technology<br>Patiala, Punjab — 147004, India</p>
+    </div>
+    <div class="footer-links">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="index.html">Members</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="positions.html">Positions</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h5>Connect</h5>
+      <ul>
+        <li><a href="#">Google Scholar</a></li>
+        <li><a href="#">ResearchGate</a></li>
+        <li><a href="https://orcid.org/0000-0002-9452-6729" target="_blank">ORCID</a></li>
+        <li><a href="#">Thapar University</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-copy">© 2026 Computational Chemistry &amp; Molecular Modelling Lab, Thapar University. All Rights Reserved.</div>
+</footer>
+
+<script>
+  const toggle = document.getElementById('navToggle');
+  const links  = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => links.classList.toggle('open'));
+</script>
+</body>
+</html>

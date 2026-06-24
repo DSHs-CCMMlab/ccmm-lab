@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact – CCMM Lab, Thapar University</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8f7f4; --surface: #ffffff; --border: #e4e0d8;
+      --text: #1a1a1a; --muted: #6b6860; --accent: #2b5ea7;
+      --accent-lt: #e8eef7; --tag-bg: #eef2f9; --tag-txt: #2b5ea7;
+      --nav-h: 64px; --radius: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --shadow-hv: 0 6px 24px rgba(0,0,0,0.12);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--border); height: var(--nav-h); display: flex; align-items: center; padding: 0 clamp(16px,4vw,48px); gap: 32px; }
+    .nav-logo { font-size: 16px; font-weight: 700; color: var(--accent); text-decoration: none; flex-shrink: 0; font-family: 'Merriweather', serif; }
+    .nav-logo span { color: var(--text); }
+    .nav-links { display: flex; list-style: none; margin-left: auto; }
+    .nav-links a { display: block; padding: 8px 14px; font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none; border-radius: 6px; transition: color .18s, background .18s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: var(--accent-lt); }
+    .nav-toggle { display: none; cursor: pointer; background: none; border: none; padding: 6px; }
+    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; }
+
+    .hero { background: linear-gradient(135deg, #1a2f5e 0%, #2b5ea7 60%, #3b7fc4 100%); color: #fff; padding: clamp(56px,8vw,96px) clamp(16px,4vw,48px); text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); opacity:.5; }
+    .hero-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: .7; margin-bottom: 14px; position: relative; }
+    .hero h1 { font-family: 'Merriweather', serif; font-size: clamp(28px,4.5vw,48px); font-weight: 300; margin-bottom: 8px; position: relative; }
+    .hero h1 strong { font-weight: 700; }
+    .hero .hero-sub { font-size: clamp(13px,1.8vw,15px); opacity:.75; margin-bottom: 20px; position: relative; }
+    .hero p { max-width: 620px; margin: 0 auto; font-size: clamp(14px,2vw,15.5px); opacity:.85; line-height: 1.78; position: relative; }
+
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px,4vw,48px); }
+
+    .section-header { border-top: 3px solid var(--accent); padding-top: 48px; margin-top: 64px; margin-bottom: 36px; }
+    .section-header .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .section-header h2 { font-family: 'Merriweather', serif; font-size: clamp(22px,3vw,30px); font-weight: 300; color: var(--text); }
+    .section-header p { margin-top: 10px; color: var(--muted); font-size: 14px; max-width: 560px; }
+
+    /* CONTACT LAYOUT */
+    .contact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 64px; }
+
+    /* INFO CARDS */
+    .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px; }
+    .info-card h3 { font-family: 'Merriweather', serif; font-size: 18px; font-weight: 400; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--accent-lt); }
+    .contact-item { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+    .contact-item:last-child { margin-bottom: 0; }
+    .ci-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .ci-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .ci-value { font-size: 14.5px; color: var(--text); line-height: 1.6; }
+    .ci-value a { color: var(--accent); text-decoration: none; }
+    .ci-value a:hover { text-decoration: underline; }
+
+    /* LINKS GRID */
+    .links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    .profile-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg);
+      text-decoration: none; transition: all .18s;
+    }
+    .profile-link:hover { background: var(--accent); border-color: var(--accent); }
+    .profile-link:hover .pl-name, .profile-link:hover .pl-sub { color: #fff; }
+    .pl-icon { font-size: 20px; flex-shrink: 0; }
+    .pl-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .pl-sub { font-size: 11px; color: var(--muted); }
+
+    /* MAP EMBED */
+    .map-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); height: 360px; background: var(--accent-lt); display: flex; align-items: center; justify-content: center; margin-bottom: 80px; }
+    .map-wrap iframe { width: 100%; height: 100%; border: 0; }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 40px clamp(16px,4vw,48px); }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
+    .footer-brand .name { font-family: 'Merriweather', serif; font-size: 15px; color: var(--accent); font-weight: 400; margin-bottom: 6px; }
+    .footer-brand p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .footer-links h5 { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 6px; }
+    .footer-links a { font-size: 13px; color: var(--accent); text-decoration: none; }
+    .footer-copy { max-width: 1100px; margin: 24px auto 0; border-top: 1px solid var(--border); padding-top: 20px; font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; flex-direction: column; position: absolute; top: var(--nav-h); left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border); padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.07); }
+      .nav-links.open { display: flex; }
+      .nav-toggle { display: block; margin-left: auto; }
+      nav { position: relative; }
+      .contact-layout { grid-template-columns: 1fr; }
+      .links-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">CCMM <span>Lab</span></a>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Members</a></li>
+    <li><a href="research.html">Research</a></li>
+    <li><a href="publications.html">Publications</a></li>
+    <li><a href="software.html">Software</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="positions.html">Positions</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Get In Touch</div>
+  <h1><strong>Contact</strong></h1>
+  <div class="hero-sub">Computational Chemistry &amp; Molecular Modelling Lab · Thapar University</div>
+  <p>For research collaborations, PhD enquiries, or general information about the lab, feel free to reach out directly to Dr. Mandal.</p>
+</section>
+
+<main class="page-wrap">
+
+  <div class="section-header">
+    <div class="eyebrow">Reach Us</div>
+    <h2>Contact Information</h2>
+  </div>
+
+  <div class="contact-layout">
+
+    <!-- LEFT: Contact details -->
+    <div class="info-card">
+      <h3>Dr. Debashish Mandal</h3>
+
+      <div class="contact-item">
+        <div class="ci-icon">✉️</div>
+        <div>
+          <div class="ci-label">Email</div>
+          <div class="ci-value"><a href="mailto:debasish.mandal@thapar.edu">debasish.mandal@thapar.edu</a></div>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="ci-icon">🏛️</div>
+        <div>
+          <div class="ci-label">Position</div>
+          <div class="ci-value">Associate Professor<br>Department of Chemistry &amp; Biochemistry</div>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="ci-icon">📍</div>
+        <div>
+          <div class="ci-label">Address</div>
+          <div class="ci-value">
+            Thapar Institute of Engineering &amp; Technology<br>
+            Patiala, Punjab — 147004<br>
+            India
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="ci-icon">🆔</div>
+        <div>
+          <div class="ci-label">ORCID</div>
+          <div class="ci-value"><a href="https://orcid.org/0000-0002-9452-6729" target="_blank">0000-0002-9452-6729</a></div>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="ci-icon">📊</div>
+        <div>
+          <div class="ci-label">h-Index / Citations</div>
+          <div class="ci-value">h-Index: 29 &nbsp;·&nbsp; Total Citations: 3330</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Online profiles -->
+    <div class="info-card">
+      <h3>Online Profiles</h3>
+      <div class="links-grid">
+
+        <a class="profile-link" href="#" target="_blank">
+          <div class="pl-icon">📚</div>
+          <div>
+            <div class="pl-name">Google Scholar</div>
+            <div class="pl-sub">Publications &amp; Citations</div>
+          </div>
+        </a>
+
+        <a class="profile-link" href="https://orcid.org/0000-0002-9452-6729" target="_blank">
+          <div class="pl-icon">🆔</div>
+          <div>
+            <div class="pl-name">ORCID</div>
+            <div class="pl-sub">0000-0002-9452-6729</div>
+          </div>
+        </a>
+
+        <a class="profile-link" href="#" target="_blank">
+          <div class="pl-icon">🔬</div>
+          <div>
+            <div class="pl-name">ResearchGate</div>
+            <div class="pl-sub">Research Profile</div>
+          </div>
+        </a>
+
+        <a class="profile-link" href="#" target="_blank">
+          <div class="pl-icon">🏫</div>
+          <div>
+            <div class="pl-name">Thapar Profile</div>
+            <div class="pl-sub">University Page</div>
+          </div>
+        </a>
+
+      </div>
+
+      <div style="margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <div class="ci-label" style="margin-bottom:12px;">For PhD / Project Enquiries</div>
+        <p style="font-size:13.5px; color:#555; line-height:1.75;">
+          Prospective PhD scholars and project students are encouraged to email Dr. Mandal directly with their CV and a brief statement of research interests. Please mention your background in chemistry, physics, or computational sciences, and any prior experience with simulation or programming tools.
+        </p>
+        <a href="mailto:debasish.mandal@thapar.edu" style="display:inline-block; margin-top:16px; padding:10px 22px; background:var(--accent); color:#fff; border-radius:6px; font-size:13.5px; font-weight:600; text-decoration:none;">
+          ✉️ Send an Email
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MAP -->
+  <div class="section-header" style="margin-top:0;">
+    <div class="eyebrow">Location</div>
+    <h2>Find Us</h2>
+    <p>Thapar Institute of Engineering &amp; Technology, Patiala, Punjab, India.</p>
+  </div>
+
+  <div class="map-wrap">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3444.0!2d76.3630!3d30.3560!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391029d800000001%3A0x123456789abcdef!2sThapar+Institute+of+Engineering+%26+Technology!5e0!3m2!1sen!2sin!4v1234567890"
+      allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="name">Computational Chemistry &amp; Molecular Modelling Lab</div>
+      <p>Department of Chemistry &amp; Biochemistry<br>Thapar Institute of Engineering &amp; Technology<br>Patiala, Punjab — 147004, India</p>
+    </div>
+    <div class="footer-links">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="index.html">Members</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h5>Connect</h5>
+      <ul>
+        <li><a href="#">Google Scholar</a></li>
+        <li><a href="#">ResearchGate</a></li>
+        <li><a href="https://orcid.org/0000-0002-9452-6729" target="_blank">ORCID</a></li>
+        <li><a href="#">Thapar University</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-copy">© 2026 Computational Chemistry &amp; Molecular Modelling Lab, Thapar University. All Rights Reserved.</div>
+</footer>
+<script>
+  document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+</script>
+</body>
+</html>

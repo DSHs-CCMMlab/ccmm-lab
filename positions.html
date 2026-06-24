@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Positions – CCMM Lab, Thapar University</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8f7f4; --surface: #ffffff; --border: #e4e0d8;
+      --text: #1a1a1a; --muted: #6b6860; --accent: #2b5ea7;
+      --accent-lt: #e8eef7; --tag-bg: #eef2f9; --tag-txt: #2b5ea7;
+      --nav-h: 64px; --radius: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --shadow-hv: 0 6px 24px rgba(0,0,0,0.12);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--border); height: var(--nav-h); display: flex; align-items: center; padding: 0 clamp(16px,4vw,48px); gap: 32px; }
+    .nav-logo { font-size: 16px; font-weight: 700; color: var(--accent); text-decoration: none; flex-shrink: 0; font-family: 'Merriweather', serif; }
+    .nav-logo span { color: var(--text); }
+    .nav-links { display: flex; list-style: none; margin-left: auto; }
+    .nav-links a { display: block; padding: 8px 14px; font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none; border-radius: 6px; transition: color .18s, background .18s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: var(--accent-lt); }
+    .nav-toggle { display: none; cursor: pointer; background: none; border: none; padding: 6px; }
+    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; }
+
+    .hero { background: linear-gradient(135deg, #1a2f5e 0%, #2b5ea7 60%, #3b7fc4 100%); color: #fff; padding: clamp(56px,8vw,96px) clamp(16px,4vw,48px); text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); opacity:.5; }
+    .hero-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: .7; margin-bottom: 14px; position: relative; }
+    .hero h1 { font-family: 'Merriweather', serif; font-size: clamp(28px,4.5vw,48px); font-weight: 300; margin-bottom: 8px; position: relative; }
+    .hero h1 strong { font-weight: 700; }
+    .hero .hero-sub { font-size: clamp(13px,1.8vw,15px); opacity:.75; margin-bottom: 20px; position: relative; }
+    .hero p { max-width: 680px; margin: 0 auto; font-size: clamp(14px,2vw,15.5px); opacity:.85; line-height: 1.78; position: relative; }
+
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px,4vw,48px); }
+
+    .section-header { border-top: 3px solid var(--accent); padding-top: 48px; margin-top: 64px; margin-bottom: 36px; }
+    .section-header .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .section-header h2 { font-family: 'Merriweather', serif; font-size: clamp(22px,3vw,30px); font-weight: 300; color: var(--text); }
+    .section-header p { margin-top: 10px; color: var(--muted); font-size: 14px; max-width: 560px; }
+
+    /* POSITION CARDS */
+    .position-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 32px 36px; margin-bottom: 20px;
+      display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start;
+    }
+    .pos-status-open { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; background: #e8f5e9; color: #2e7d32; margin-bottom: 12px; }
+    .pos-status-open::before { content: '●'; font-size: 8px; }
+    .pos-status-closed { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 10px; background: #fafafa; color: var(--muted); border: 1px solid var(--border); margin-bottom: 12px; }
+    .position-card h3 { font-family: 'Merriweather', serif; font-size: 19px; font-weight: 400; margin-bottom: 10px; }
+    .position-card p { font-size: 13.5px; line-height: 1.78; color: #555; margin-bottom: 14px; }
+    .pos-reqs { margin-bottom: 16px; }
+    .pos-reqs h5 { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .pos-reqs ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .pos-reqs li { font-size: 13px; color: #444; padding-left: 16px; position: relative; }
+    .pos-reqs li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 11px; top: 2px; }
+    .pos-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pos-tags span { background: var(--tag-bg); color: var(--tag-txt); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 12px; border: 1px solid #c5d5ee; }
+    .apply-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 13.5px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background .18s; }
+    .apply-btn:hover { background: #1a4080; }
+
+    /* WHO WE ARE LOOKING FOR */
+    .qualities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .quality-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+    .quality-card .qc-icon { font-size: 28px; margin-bottom: 10px; }
+    .quality-card h4 { font-size: 14.5px; font-weight: 600; margin-bottom: 6px; }
+    .quality-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* CTA */
+    .cta-strip { background: linear-gradient(135deg, #1a2f5e 0%, #2b5ea7 100%); border-radius: 12px; padding: 48px 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 80px; }
+    .cta-strip h3 { font-family: 'Merriweather', serif; font-size: clamp(18px,2.5vw,22px); font-weight: 300; color: #fff; margin-bottom: 8px; }
+    .cta-strip p { color: rgba(255,255,255,.75); font-size: 14px; max-width: 440px; }
+    .cta-btn { display: inline-block; padding: 12px 28px; background: #fff; color: var(--accent); font-weight: 700; font-size: 14px; border-radius: 6px; text-decoration: none; white-space: nowrap; }
+    .cta-btn:hover { background: var(--accent-lt); }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 40px clamp(16px,4vw,48px); }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
+    .footer-brand .name { font-family: 'Merriweather', serif; font-size: 15px; color: var(--accent); font-weight: 400; margin-bottom: 6px; }
+    .footer-brand p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .footer-links h5 { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 6px; }
+    .footer-links a { font-size: 13px; color: var(--accent); text-decoration: none; }
+    .footer-copy { max-width: 1100px; margin: 24px auto 0; border-top: 1px solid var(--border); padding-top: 20px; font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; flex-direction: column; position: absolute; top: var(--nav-h); left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border); padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.07); }
+      .nav-links.open { display: flex; }
+      .nav-toggle { display: block; margin-left: auto; }
+      nav { position: relative; }
+      .position-card { grid-template-columns: 1fr; }
+      .cta-strip { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">CCMM <span>Lab</span></a>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Members</a></li>
+    <li><a href="research.html">Research</a></li>
+    <li><a href="publications.html">Publications</a></li>
+    <li><a href="software.html">Software</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="positions.html" class="active">Positions</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Join Us</div>
+  <h1><strong>Open Positions</strong></h1>
+  <div class="hero-sub">Computational Chemistry &amp; Molecular Modelling Lab · Thapar University</div>
+  <p>We are always looking for motivated researchers with a passion for understanding chemistry at the atomic level. If you are excited about using computation to solve real chemical problems, we'd love to hear from you.</p>
+</section>
+
+<main class="page-wrap">
+
+  <!-- OPEN POSITIONS -->
+  <div class="section-header">
+    <div class="eyebrow">Openings</div>
+    <h2>Current Openings</h2>
+    <p>Positions currently available or expected to open in the CCMM Lab.</p>
+  </div>
+
+  <div class="position-card">
+    <div>
+      <span class="pos-status-open">Open</span>
+      <h3>PhD Scholar (JRF / SRF)</h3>
+      <p>We invite applications from highly motivated candidates for doctoral research in computational chemistry. Projects are available in (1) DFT studies of metal–oxo complexes and C–H activation, (2) Machine Learning for chemical property prediction, and (3) integrated MD/Docking/QM–MM pipeline for drug discovery and enzyme catalysis. Funding is available through national fellowship schemes (CSIR/UGC/DST INSPIRE) or institute teaching assistantships.</p>
+      <div class="pos-reqs">
+        <h5>Requirements</h5>
+        <ul>
+          <li>M.Sc. in Chemistry, Physics, Biochemistry, or a related field</li>
+          <li>Qualified in CSIR-NET / UGC-NET / GATE or equivalent national exam</li>
+          <li>Interest in computational methods (prior experience is a plus, not mandatory)</li>
+          <li>Basic programming skills (Python, shell scripting) are advantageous</li>
+        </ul>
+      </div>
+      <div class="pos-tags">
+        <span>DFT</span><span>Molecular Dynamics</span><span>ML</span><span>QM/MM</span><span>Drug Design</span>
+      </div>
+    </div>
+    <a class="apply-btn" href="mailto:debasish.mandal@thapar.edu?subject=PhD Application – CCMM Lab">Apply →</a>
+  </div>
+
+  <div class="position-card">
+    <div>
+      <span class="pos-status-open">Open</span>
+      <h3>Project / M.Sc. Dissertation Student</h3>
+      <p>Short-term project positions are available for M.Sc. students who wish to carry out their dissertation research in the CCMM Lab. Students will gain hands-on experience with industry-standard computational chemistry software including Gaussian, ORCA, GROMACS, and AutoDock. Projects are tailored to the student's background and available time frame.</p>
+      <div class="pos-reqs">
+        <h5>Requirements</h5>
+        <ul>
+          <li>Currently enrolled in an M.Sc. programme in Chemistry, Physics, or Biochemistry</li>
+          <li>Curiosity-driven approach to problem solving</li>
+          <li>Willingness to learn Linux/command-line environments</li>
+        </ul>
+      </div>
+      <div class="pos-tags">
+        <span>M.Sc. Dissertation</span><span>Computational Chemistry</span><span>Training Provided</span>
+      </div>
+    </div>
+    <a class="apply-btn" href="mailto:debasish.mandal@thapar.edu?subject=Project Student Application – CCMM Lab">Apply →</a>
+  </div>
+
+  <div class="position-card">
+    <div>
+      <span class="pos-status-closed">Enquire</span>
+      <h3>Post-Doctoral Researcher</h3>
+      <p>Post-doctoral positions are filled based on the availability of project funding. Candidates with strong backgrounds in quantum chemistry, biomolecular simulation, or ML for chemistry are encouraged to reach out to Dr. Mandal directly with their CV and a brief statement of research interests. Collaborative post-doctoral arrangements (where the candidate brings their own fellowship) are always welcome.</p>
+      <div class="pos-reqs">
+        <h5>Requirements</h5>
+        <ul>
+          <li>PhD in Chemistry, Physics, Chemical Biology, or Computational Sciences</li>
+          <li>Strong publication record in relevant areas</li>
+          <li>Experience with at least one of: DFT codes, MD engines, or ML for chemistry</li>
+        </ul>
+      </div>
+      <div class="pos-tags">
+        <span>Post-Doc</span><span>Funding Dependent</span><span>Collaborative Welcome</span>
+      </div>
+    </div>
+    <a class="apply-btn" href="mailto:debasish.mandal@thapar.edu?subject=Post-Doc Enquiry – CCMM Lab">Enquire →</a>
+  </div>
+
+  <!-- WHO WE LOOK FOR -->
+  <div class="section-header">
+    <div class="eyebrow">Culture</div>
+    <h2>Who We Are Looking For</h2>
+    <p>Beyond qualifications, here is what makes someone a great fit for the CCMM Lab.</p>
+  </div>
+
+  <div class="qualities-grid">
+    <div class="quality-card">
+      <div class="qc-icon">🔍</div>
+      <h4>Scientific Curiosity</h4>
+      <p>A genuine desire to understand how and why reactions happen at the atomic level — not just to get the right answer, but to understand what it means.</p>
+    </div>
+    <div class="quality-card">
+      <div class="qc-icon">💻</div>
+      <h4>Computational Mindset</h4>
+      <p>Comfort with working on Linux systems, running command-line tools, and a willingness to learn new software. Prior coding experience is a strong plus.</p>
+    </div>
+    <div class="quality-card">
+      <div class="qc-icon">🤝</div>
+      <h4>Collaborative Spirit</h4>
+      <p>The lab's strength comes from team members supporting each other. We value open communication, knowledge sharing, and a positive attitude.</p>
+    </div>
+    <div class="quality-card">
+      <div class="qc-icon">📈</div>
+      <h4>Drive to Publish</h4>
+      <p>We aim to produce impactful, rigorous research. Students who are motivated to see their work appear in high-quality international journals thrive here.</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-strip">
+    <div>
+      <h3>Ready to apply or just want to learn more?</h3>
+      <p>Send your CV and a short paragraph about your research interests to Dr. Mandal. Even if there is no formal opening listed, we are always happy to hear from exceptional candidates.</p>
+    </div>
+    <a class="cta-btn" href="mailto:debasish.mandal@thapar.edu">✉️ Contact Dr. Mandal</a>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="name">Computational Chemistry &amp; Molecular Modelling Lab</div>
+      <p>Department of Chemistry &amp; Biochemistry<br>Thapar Institute of Engineering &amp; Technology<br>Patiala, Punjab — 147004, India</p>
+    </div>
+    <div class="footer-links">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="index.html">Members</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h5>Connect</h5>
+      <ul>
+        <li><a href="#">Google Scholar</a></li>
+        <li><a href="#">ResearchGate</a></li>
+        <li><a href="https://orcid.org/0000-0002-9452-6729" target="_blank">ORCID</a></li>
+        <li><a href="#">Thapar University</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-copy">© 2026 Computational Chemistry &amp; Molecular Modelling Lab, Thapar University. All Rights Reserved.</div>
+</footer>
+<script>
+  document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+</script>
+</body>
+</html>
