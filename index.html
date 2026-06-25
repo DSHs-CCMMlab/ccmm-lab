@@ -395,16 +395,234 @@
   </ul>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-badge">
-    <span class="star">★</span> Ranked in World's Top 2% Scientists — Elsevier / Stanford, 2024
+<!-- HERO with protein-ligand animation -->
+<section class="hero" style="position:relative;overflow:hidden;padding:0;min-height:520px;display:flex;align-items:center;justify-content:center; background:#0d1b3e;">
+  <canvas id="molCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;"></canvas>
+  <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(13,27,62,0.55) 0%,rgba(20,50,100,0.45) 100%);z-index:1;"></div>
+  <div style="position:relative;z-index:2;text-align:center;padding:clamp(56px,8vw,96px) clamp(16px,4vw,48px);">
+    <div class="hero-badge">
+      <span class="star">★</span> Ranked in World's Top 2% Scientists — Elsevier / Stanford, 2024
+    </div>
+    <div class="hero-eyebrow">Our Team</div>
+    <h1><strong>Computational Chemistry</strong> &amp; Molecular Modelling Lab</h1>
+    <div class="hero-sub">Department of Chemistry &amp; Biochemistry &nbsp;·&nbsp; Thapar Institute of Engineering &amp; Technology, Patiala</div>
+    <p>We investigate the novel insights behind chemical driving forces, reaction mechanisms, and drug design — combining quantum mechanics, molecular simulation, and machine learning to tackle problems at the frontier of chemistry and biology.</p>
   </div>
-  <div class="hero-eyebrow">Our Team</div>
-  <h1><strong>Computational Chemistry</strong> &amp; Molecular Modelling Lab</h1>
-  <div class="hero-sub">Department of Chemistry &amp; Biochemistry &nbsp;·&nbsp; Thapar Institute of Engineering &amp; Technology, Patiala</div>
-  <p>We investigate the novel insights behind chemical driving forces, reaction mechanisms, and drug design — combining quantum mechanics, molecular simulation, and machine learning to tackle problems at the frontier of chemistry and biology.</p>
 </section>
+
+<script>
+(function(){
+  const canvas = document.getElementById('molCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, t = 0;
+
+  /* ── resize ── */
+  function resize(){
+    const p = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width  = p.width  || window.innerWidth;
+    H = canvas.height = p.height || 520;
+  }
+
+  /* ══════════════════════════════════════════════
+     PROTEIN  – a large folded ribbon with helices
+     drawn as a continuous bezier backbone
+  ══════════════════════════════════════════════ */
+  function buildProtein(cx, cy, scale){
+    /* control points for the backbone – fixed shape, slow rotation */
+    const pts = [
+      [-120,-80],[-80,-120],[-20,-110],[30,-90],
+      [70,-60],[100,-20],[90, 30],[60, 70],
+      [20, 100],[-30, 95],[-80, 70],[-110, 20],
+      [-100,-30],[-60,-50],[0,-40],[50,-10],
+      [80, 40],[60, 80],[10, 90],[-50, 60],
+      [-80, 10],[-60,-40],[-10,-60],[40,-40],
+      [70,  0],[70, 50],[30, 80],[-20, 70],
+    ];
+    return pts.map(([x,y]) => ({
+      x: cx + x * scale,
+      y: cy + y * scale
+    }));
+  }
+
+  /* ══════════════════════════════════════════════
+     LIGAND  – small rigid molecule that orbits
+     and docks into the protein
+  ══════════════════════════════════════════════ */
+  const LIGAND_ATOMS = [
+    {dx:  0, dy:  0, color:'#ffdd57', r:11, label:'C'},
+    {dx: 28, dy: -16, color:'#ff6b6b', r:10, label:'O'},
+    {dx: 28, dy:  16, color:'#74c7ff', r:10, label:'N'},
+    {dx:-28, dy: -16, color:'#74c7ff', r:10, label:'N'},
+    {dx:-28, dy:  16, color:'#ff6b6b', r:10, label:'O'},
+    {dx:  0, dy: -32, color:'#a9e34b', r: 9, label:'C'},
+    {dx:  0, dy:  32, color:'#a9e34b', r: 9, label:'C'},
+    {dx: 56, dy:   0, color:'#ffdd57', r: 8, label:'C'},
+    {dx:-56, dy:   0, color:'#ffdd57', r: 8, label:'C'},
+  ];
+  const LIGAND_BONDS = [
+    [0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[1,7],[3,8],[5,6],[7,2],[8,4]
+  ];
+
+  /* atom color palette for protein residues */
+  const RES_COLORS = ['#60a5fa','#34d399','#f472b6','#a78bfa','#fb923c','#22d3ee'];
+
+  function drawProtein(pts, alpha){
+    if(pts.length < 2) return;
+
+    /* ribbon / backbone */
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#60a5fa';
+    ctx.lineWidth   = 3;
+    ctx.shadowColor = '#60a5fa';
+    ctx.shadowBlur  = 12;
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for(let i=1; i<pts.length-2; i++){
+      const mx = (pts[i].x + pts[i+1].x)/2;
+      const my = (pts[i].y + pts[i+1].y)/2;
+      ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    /* helix coils – draw spring-like arcs every 4 pts */
+    for(let i=0; i<pts.length-4; i+=4){
+      const ax=pts[i].x, ay=pts[i].y;
+      const bx=pts[i+3].x, by=pts[i+3].y;
+      const mx=(ax+bx)/2, my=(ay+by)/2;
+      const nx=-(by-ay)*0.35, ny=(bx-ax)*0.35;
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.55;
+      ctx.strokeStyle = RES_COLORS[i % RES_COLORS.length];
+      ctx.lineWidth = 2;
+      ctx.shadowColor = RES_COLORS[i % RES_COLORS.length];
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(ax,ay);
+      ctx.bezierCurveTo(ax+nx,ay+ny, bx+nx,by+ny, bx,by);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* residue spheres */
+    pts.forEach((p, i)=>{
+      const col = RES_COLORS[i % RES_COLORS.length];
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.shadowColor = col; ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI*2);
+      ctx.fillStyle = col; ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function drawLigand(cx, cy, alpha){
+    /* bonds */
+    LIGAND_BONDS.forEach(([a,b])=>{
+      const A = LIGAND_ATOMS[a], B = LIGAND_ATOMS[b];
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth   = 2.5;
+      ctx.shadowColor = '#fff'; ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(cx+A.dx, cy+A.dy);
+      ctx.lineTo(cx+B.dx, cy+B.dy);
+      ctx.stroke();
+      ctx.restore();
+    });
+    /* atoms */
+    LIGAND_ATOMS.forEach(a=>{
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.shadowColor = a.color; ctx.shadowBlur = 18;
+      ctx.beginPath(); ctx.arc(cx+a.dx, cy+a.dy, a.r, 0, Math.PI*2);
+      ctx.fillStyle = a.color; ctx.fill();
+      ctx.restore();
+      /* label */
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#0d1b3e';
+      ctx.font = `bold ${a.r-1}px Inter,sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(a.label, cx+a.dx, cy+a.dy);
+      ctx.restore();
+    });
+  }
+
+  /* dashed line showing hydrogen bond / interaction */
+  function drawInteraction(x1,y1,x2,y2,alpha){
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.75;
+    ctx.setLineDash([6,5]);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth   = 1.8;
+    ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.restore();
+    ctx.setLineDash([]);
+  }
+
+  /* ── main draw loop ── */
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    t += 0.008;
+
+    /* ── LEFT protein (slow rotation by shifting pts) ── */
+    const pCX = W * 0.28, pCY = H * 0.5;
+    const angle1 = t * 0.4;
+    const rawPts = buildProtein(0,0,1.0);
+    const protPts = rawPts.map(p=>({
+      x: pCX + p.x * Math.cos(angle1) - p.y * Math.sin(angle1),
+      y: pCY + p.x * Math.sin(angle1) + p.y * Math.cos(angle1),
+    }));
+    drawProtein(protPts, 0.9);
+
+    /* ── RIGHT protein (rotates opposite) ── */
+    const pCX2 = W * 0.72, pCY2 = H * 0.5;
+    const angle2 = -t * 0.3 + 1.2;
+    const protPts2 = rawPts.map(p=>({
+      x: pCX2 + p.x * Math.cos(angle2) - p.y * Math.sin(angle2),
+      y: pCY2 + p.x * Math.sin(angle2) + p.y * Math.cos(angle2),
+    }));
+    drawProtein(protPts2, 0.75);
+
+    /* ── LIGAND orbiting left protein ── */
+    const orbitR = 155;
+    const ligAngle = t * 1.1;
+    const ligX = pCX + Math.cos(ligAngle) * orbitR;
+    const ligY = pCY + Math.sin(ligAngle) * orbitR * 0.55;
+
+    /* docking phase: when ligand is near the "binding pocket" (bottom-right of protein) */
+    const dockAngle = Math.PI * 0.25;
+    const angleDiff = Math.abs(((ligAngle % (Math.PI*2)) - dockAngle + Math.PI*3) % (Math.PI*2) - Math.PI);
+    const dockAlpha = Math.max(0, 1 - angleDiff / 0.6);
+
+    /* interaction lines to nearest protein residues when docking */
+    if(dockAlpha > 0.1){
+      const nearPts = protPts.slice(12,16);
+      nearPts.forEach(p=>{
+        drawInteraction(ligX, ligY, p.x, p.y, dockAlpha * 0.85);
+      });
+    }
+
+    drawLigand(ligX, ligY, 0.95);
+
+    /* ── small floating ligand near right protein ── */
+    const ligAngle2 = -t * 0.9 + 0.8;
+    const ligX2 = pCX2 + Math.cos(ligAngle2) * 130;
+    const ligY2 = pCY2 + Math.sin(ligAngle2) * 50;
+    drawLigand(ligX2, ligY2, 0.7);
+
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', ()=>{ resize(); });
+  resize();
+  tick();
+})();
+</script>
 
 <!-- MAIN -->
 <main class="page-wrap">
