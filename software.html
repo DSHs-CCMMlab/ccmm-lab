@@ -145,45 +145,22 @@
 
 <main class="page-wrap">
 
-  <!-- COMPUTATIONAL PIPELINE -->
+  <!-- INTERACTIVE SOLAR SYSTEM -->
   <div class="section-header">
-    <div class="eyebrow">Workflow</div>
-    <h2>Integrated Computational Pipeline</h2>
-    <p>How our tools connect in a typical research workflow — from quantum calculation to drug candidate.</p>
+    <div class="eyebrow">Interactive</div>
+    <h2>The Lab's Software Universe</h2>
+    <p>Each tool orbits the lab's core. Click any planet to explore what it does.</p>
   </div>
 
-  <div class="pipeline">
-    <h4>Drug Discovery &amp; Enzyme Catalysis Pipeline</h4>
-    <div class="pipeline-flow">
-      <div class="pipe-step">
-        <div class="ps-icon">⚛️</div>
-        <div class="ps-name">QM Calculation</div>
-        <div class="ps-tool">Gaussian16 / ORCA / Turbomole</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-step">
-        <div class="ps-icon">🔗</div>
-        <div class="ps-name">QM/MM</div>
-        <div class="ps-tool">ChemShell</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-step">
-        <div class="ps-icon">🎯</div>
-        <div class="ps-name">Docking</div>
-        <div class="ps-tool">AutoDock-GPU</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-step">
-        <div class="ps-icon">🌊</div>
-        <div class="ps-name">MD Simulation</div>
-        <div class="ps-tool">AMBER24 / GROMACS / NAMD</div>
-      </div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-step">
-        <div class="ps-icon">🤖</div>
-        <div class="ps-name">ML Filtering</div>
-        <div class="ps-tool">Python / Scikit-learn</div>
-      </div>
+  <div style="position:relative;background:#0a0e1f;border-radius:16px;overflow:hidden;margin-bottom:48px;box-shadow:0 8px 40px rgba(0,0,0,0.35);">
+    <canvas id="solarCanvas" style="display:block;width:100%;cursor:pointer;"></canvas>
+    <div id="swPanel" style="display:none;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(15,25,60,0.97);border:1px solid rgba(100,160,255,0.3);border-radius:12px;padding:20px 28px;min-width:300px;max-width:460px;box-shadow:0 8px 32px rgba(0,0,0,0.5);text-align:center;z-index:10;backdrop-filter:blur(8px);">
+      <div id="swPanelClose" style="position:absolute;top:10px;right:14px;color:#aaa;cursor:pointer;font-size:18px;line-height:1;">&#x2715;</div>
+      <div id="swPanelIcon" style="font-size:32px;margin-bottom:8px;"></div>
+      <div id="swPanelName" style="font-family:'Merriweather',serif;font-size:20px;color:#fff;margin-bottom:4px;font-weight:400;"></div>
+      <div id="swPanelCat" style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;"></div>
+      <div id="swPanelDesc" style="font-size:13px;color:#b0c4e8;line-height:1.7;margin-bottom:10px;"></div>
+      <div id="swPanelUse" style="font-size:12px;color:#7fa8d8;font-style:italic;"></div>
     </div>
   </div>
 
@@ -342,6 +319,258 @@
   </div>
   <div class="footer-copy">© 2026 Computational Chemistry &amp; Molecular Modelling Lab, Thapar University. All Rights Reserved.</div>
 </footer>
+
+<script>
+(function(){
+  const canvas = document.getElementById('solarCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, animId, t = 0;
+
+  const TOOLS = [
+    {
+      name:'Gaussian 16', icon:'⚛️', cat:'Quantum Chemistry', catColor:'#60a5fa',
+      color:'#60a5fa', r:22, orbitR:0, speed:0,
+      desc:'Industry-standard DFT package for geometry optimizations, transition state searches, NBO analysis, and thermochemistry on metal–oxo and organic systems.',
+      use:'DFT · IRC · NBO · TD-DFT · Thermochemistry'
+    },
+    {
+      name:'ORCA', icon:'🔬', cat:'Quantum Chemistry', catColor:'#60a5fa',
+      color:'#818cf8', r:20, orbitR:110, speed:0.008, angle:0,
+      desc:'Powerful open-shell QM package. Used for high-accuracy DLPNO-CCSD(T), CASSCF multireference, EPR/NMR spectra, and spin density analysis on iron–oxo complexes.',
+      use:'DLPNO-CCSD(T) · CASSCF · EPR/NMR · Spin Densities'
+    },
+    {
+      name:'Turbomole', icon:'🧮', cat:'Quantum Chemistry', catColor:'#60a5fa',
+      color:'#a78bfa', r:18, orbitR:110, speed:0.008, angle:2.1,
+      desc:'Efficient QM program with RI approximations. Used for large-system DFT, TDDFT excited states, and geometry optimizations where speed is critical.',
+      use:'RI-DFT · TDDFT · Large System QM'
+    },
+    {
+      name:'AMBER 24', icon:'🌊', cat:'Molecular Dynamics', catColor:'#34d399',
+      color:'#34d399', r:21, orbitR:190, speed:0.005, angle:0.5,
+      desc:'Premier biomolecular MD suite. Used for protein–ligand simulations, MM-GBSA binding free energies, FEP calculations, and QM/MM system preparation with GPU acceleration.',
+      use:'Protein MD · MM-GBSA · FEP · QM/MM Prep'
+    },
+    {
+      name:'GROMACS', icon:'⚡', cat:'Molecular Dynamics', catColor:'#34d399',
+      color:'#6ee7b7', r:19, orbitR:190, speed:0.005, angle:2.6,
+      desc:'Fastest open-source MD engine. Used for metadynamics, umbrella sampling, PMF calculations, and large-scale comparative MD studies on proteins and ligands.',
+      use:'MD · Metadynamics · Umbrella Sampling · PMF'
+    },
+    {
+      name:'NAMD', icon:'🧬', cat:'Molecular Dynamics', catColor:'#34d399',
+      color:'#10b981', r:17, orbitR:190, speed:0.005, angle:4.8,
+      desc:'High-performance parallel MD for large biomolecular systems. Used for steered MD, membrane proteins, and long trajectory visualisation alongside VMD.',
+      use:'Steered MD · Membrane Simulations · Large Systems'
+    },
+    {
+      name:'AutoDock-GPU', icon:'🎯', cat:'Molecular Docking', catColor:'#fb923c',
+      color:'#fb923c', r:20, orbitR:270, speed:0.0035, angle:1.0,
+      desc:'GPU-accelerated virtual screening suite. Powers the first stage of our drug discovery pipeline — screening millions of compounds from ZINC/PubChem against biological targets.',
+      use:'Virtual Screening · Binding Pose Prediction · Pharmacophore'
+    },
+    {
+      name:'ChemShell', icon:'🔗', cat:'QM/MM', catColor:'#f472b6',
+      color:'#f472b6', r:19, orbitR:270, speed:0.0035, angle:3.7,
+      desc:'Modular QM/MM framework bridging ORCA/Gaussian with AMBER/DL_POLY. Used for enzyme active-site QM/MM geometry optimizations and reaction mechanism studies.',
+      use:'Enzyme QM/MM · Active Site Reactivity · QM/MM Optimisation'
+    },
+  ];
+
+  // Sun = CCMM Lab core
+  const SUN = TOOLS[0];
+
+  function resize(){
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width  = rect.width  || 900;
+    H = canvas.height = Math.min(W * 0.56, 500);
+    canvas.style.height = H + 'px';
+  }
+
+  function drawStars(){
+    ctx.save();
+    for(let i=0;i<120;i++){
+      const sx = (i*137.5) % W;
+      const sy = (i*97.3)  % H;
+      const sr = (i%3===0)?1.2:(i%5===0)?0.8:0.5;
+      ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${0.2+0.4*(i%3)/3})`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawOrbitRing(r){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(W/2, H/2, r, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(100,140,255,0.12)';
+    ctx.lineWidth=1; ctx.setLineDash([4,6]);
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  function drawSun(){
+    // Glow layers
+    [60,40,24].forEach((gr,i)=>{
+      const grd = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,gr);
+      grd.addColorStop(0,`rgba(255,220,80,${0.18-i*0.04})`);
+      grd.addColorStop(1,'rgba(255,180,0,0)');
+      ctx.beginPath(); ctx.arc(W/2,H/2,gr,0,Math.PI*2);
+      ctx.fillStyle=grd; ctx.fill();
+    });
+    // Core
+    ctx.save();
+    ctx.shadowColor='#ffd700'; ctx.shadowBlur=30;
+    ctx.beginPath(); ctx.arc(W/2,H/2,22,0,Math.PI*2);
+    ctx.fillStyle='#ffd700'; ctx.fill();
+    ctx.restore();
+    // Label
+    ctx.save();
+    ctx.fillStyle='#0a0e1f';
+    ctx.font='bold 9px Inter,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('CCMM',W/2,H/2-3);
+    ctx.fillText('LAB',W/2,H/2+6);
+    ctx.restore();
+  }
+
+  function getPlanetPos(tool){
+    if(!tool.orbitR) return {x:W/2, y:H/2};
+    return {
+      x: W/2 + Math.cos(tool.angle) * tool.orbitR,
+      y: H/2 + Math.sin(tool.angle) * tool.orbitR * 0.45,
+    };
+  }
+
+  function drawPlanet(tool, hovered){
+    const pos = getPlanetPos(tool);
+    const pulse = hovered ? 4 : Math.sin(t*2 + tool.angle)*2;
+    const r = tool.r + pulse;
+
+    // Orbit trail glow
+    ctx.save();
+    ctx.shadowColor = tool.color; ctx.shadowBlur = hovered ? 28 : 14;
+    // Planet body
+    const grd = ctx.createRadialGradient(pos.x-r*0.3, pos.y-r*0.3, r*0.1, pos.x, pos.y, r);
+    grd.addColorStop(0, '#ffffff');
+    grd.addColorStop(0.3, tool.color);
+    grd.addColorStop(1, tool.color+'88');
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2);
+    ctx.fillStyle = grd; ctx.fill();
+    ctx.restore();
+
+    // Icon
+    ctx.save();
+    ctx.font = `${Math.floor(r*0.9)}px serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(tool.icon, pos.x, pos.y);
+    ctx.restore();
+
+    // Name label below
+    ctx.save();
+    ctx.globalAlpha = hovered ? 1 : 0.85;
+    ctx.fillStyle = '#fff';
+    ctx.font = `${hovered?'bold ':''} 10px Inter,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(tool.name, pos.x, pos.y + r + 5);
+    ctx.restore();
+
+    return pos;
+  }
+
+  let hoveredIdx = -1;
+  let selectedIdx = -1;
+
+  function getHit(mx, my){
+    for(let i=1;i<TOOLS.length;i++){
+      const pos = getPlanetPos(TOOLS[i]);
+      const dx=mx-pos.x, dy=my-pos.y;
+      if(Math.sqrt(dx*dx+dy*dy) <= TOOLS[i].r + 8) return i;
+    }
+    return -1;
+  }
+
+  function showPanel(idx){
+    const t = TOOLS[idx];
+    document.getElementById('swPanelIcon').textContent = t.icon;
+    document.getElementById('swPanelName').textContent = t.name;
+    document.getElementById('swPanelCat').textContent  = t.cat;
+    document.getElementById('swPanelCat').style.color  = t.catColor;
+    document.getElementById('swPanelDesc').textContent = t.desc;
+    document.getElementById('swPanelUse').textContent  = '🔧 ' + t.use;
+    document.getElementById('swPanel').style.display   = 'block';
+  }
+
+  canvas.addEventListener('mousemove', e=>{
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width;
+    const scaleY = H / rect.height;
+    hoveredIdx = getHit((e.clientX - rect.left)*scaleX, (e.clientY - rect.top)*scaleY);
+    canvas.style.cursor = hoveredIdx >= 0 ? 'pointer' : 'default';
+  });
+
+  canvas.addEventListener('click', e=>{
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width;
+    const scaleY = H / rect.height;
+    const hit = getHit((e.clientX - rect.left)*scaleX, (e.clientY - rect.top)*scaleY);
+    if(hit >= 0){ selectedIdx = hit; showPanel(hit); }
+  });
+
+  canvas.addEventListener('touchend', e=>{
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.changedTouches[0];
+    const scaleX = W / rect.width;
+    const scaleY = H / rect.height;
+    const hit = getHit((touch.clientX - rect.left)*scaleX, (touch.clientY - rect.top)*scaleY);
+    if(hit >= 0){ selectedIdx = hit; showPanel(hit); }
+  });
+
+  document.getElementById('swPanelClose').addEventListener('click', ()=>{
+    document.getElementById('swPanel').style.display='none';
+    selectedIdx=-1;
+  });
+
+  function tick(){
+    t += 0.016;
+    ctx.clearRect(0,0,W,H);
+
+    // Background
+    const bg = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.7);
+    bg.addColorStop(0,'#0d1535'); bg.addColorStop(1,'#050810');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+    drawStars();
+
+    // Orbit rings
+    [110,190,270].forEach(r => drawOrbitRing(r));
+
+    // Update angles
+    for(let i=1;i<TOOLS.length;i++) TOOLS[i].angle += TOOLS[i].speed;
+
+    // Draw planets
+    for(let i=1;i<TOOLS.length;i++){
+      drawPlanet(TOOLS[i], i===hoveredIdx || i===selectedIdx);
+    }
+
+    drawSun();
+
+    // Hint text
+    ctx.save();
+    ctx.globalAlpha=0.4; ctx.fillStyle='#7090c0';
+    ctx.font='11px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Click any planet to explore the tool', W/2, H-14);
+    ctx.restore();
+
+    animId = requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', ()=>{ resize(); });
+  resize();
+  tick();
+})();
+</script>
+
 <script>
   document.getElementById('navToggle').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
 </script>
