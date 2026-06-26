@@ -335,42 +335,42 @@
      ────────────────────────────────────────────────────────────────── */
   const PLANETS = [
     { name:'Gaussian 16',  icon:'⚛️',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
-      color:'#7fb3ff', glow:'#3b6fd6', r:30, orbitR: 95, speed:0.0095, angle:0.0,  tilt:0.38, waveCount:3,
+      color:'#5b8def', glow:'#27408a', r:30, orbitR:140, speed:0.0095, angle:0.0,  tilt:0.52, waveCount:3,
       desc:'Industry-standard DFT package for geometry optimizations, transition state searches, NBO analysis, and thermochemistry on metal–oxo and organic systems.',
       use:'DFT · IRC · NBO · TD-DFT · Thermochemistry' },
 
     { name:'ORCA',         icon:'🔬',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
-      color:'#a6a0ff', glow:'#6a5fd1', r:27, orbitR:150, speed:0.0072, angle:1.05, tilt:0.38, waveCount:3,
+      color:'#9b6bff', glow:'#4d2a92', r:27, orbitR:205, speed:0.0072, angle:1.05, tilt:0.52, waveCount:3,
       desc:'Powerful open-shell QM package. Used for high-accuracy DLPNO-CCSD(T), CASSCF, EPR/NMR spectra, and spin density analysis on iron–oxo complexes.',
       use:'DLPNO-CCSD(T) · CASSCF · EPR/NMR · Spin Densities' },
 
     { name:'Turbomole',    icon:'🧮',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
-      color:'#caa6ff', glow:'#8a63d6', r:24, orbitR:205, speed:0.0058, angle:3.67, tilt:0.38, waveCount:3,
+      color:'#39c7c7', glow:'#11696e', r:24, orbitR:270, speed:0.0058, angle:3.67, tilt:0.52, waveCount:3,
       desc:'Efficient QM program with RI approximations. Used for large-system DFT, TDDFT excited states, and fast geometry optimizations.',
       use:'RI-DFT · TDDFT · Large System QM' },
 
     { name:'AMBER 24',     icon:'🌊',  cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#7fe6c1', glow:'#1f9e74', r:32, orbitR:260, speed:0.0045, angle:0.52, tilt:0.38, waveCount:5,
+      color:'#2ecc71', glow:'#15703d', r:32, orbitR:335, speed:0.0045, angle:0.52, tilt:0.52, waveCount:5,
       desc:'Premier biomolecular MD suite. Protein–ligand MD, MM-GBSA/FEP binding free energies, QM/MM system preparation with GPU acceleration.',
       use:'Protein MD · MM-GBSA · FEP · QM/MM Prep' },
 
     { name:'GROMACS',      icon:'⚡',  cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#9be8b8', glow:'#2a9d6a', r:28, orbitR:315, speed:0.0036, angle:2.62, tilt:0.38, waveCount:5, hasRing:true,
+      color:'#e0b25c', glow:'#8a611c', r:28, orbitR:400, speed:0.0036, angle:2.62, tilt:0.52, waveCount:5, hasRing:true,
       desc:'Fastest open-source MD engine. Used for metadynamics, umbrella sampling, PMF calculations, and large-scale comparative MD studies.',
       use:'MD · Metadynamics · Umbrella Sampling · PMF' },
 
     { name:'NAMD',         icon:'🧬',  cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#7fd9a8', glow:'#1d7f55', r:25, orbitR:370, speed:0.0029, angle:4.71, tilt:0.38, waveCount:4,
+      color:'#ff6b5b', glow:'#962518', r:25, orbitR:460, speed:0.0029, angle:4.71, tilt:0.52, waveCount:4,
       desc:'High-performance parallel MD for large biomolecular systems, membrane proteins, and nucleic acids. Used alongside VMD for trajectory visualization.',
       use:'Steered MD · Membrane Simulations · Large Systems' },
 
     { name:'AutoDock-GPU', icon:'🎯',  cat:'Molecular Docking',  catColor:'#fb923c',
-      color:'#ffc488', glow:'#d9670f', r:31, orbitR:425, speed:0.0024, angle:1.05, tilt:0.38, waveCount:5, hasSpot:true,
+      color:'#ff9a3c', glow:'#9c4906', r:31, orbitR:520, speed:0.0024, angle:1.05, tilt:0.52, waveCount:5, hasSpot:true,
       desc:'GPU-accelerated virtual screening suite. Screens millions of compounds from ZINC/PubChem against biological targets — orders of magnitude faster than CPU runs.',
       use:'Virtual Screening · Binding Pose · Pharmacophore' },
 
     { name:'ChemShell',    icon:'🔗',  cat:'QM/MM',              catColor:'#f472b6',
-      color:'#ff9fc9', glow:'#cf3d80', r:26, orbitR:480, speed:0.0020, angle:3.67, tilt:0.38, waveCount:4,
+      color:'#ff4fa0', glow:'#921057', r:26, orbitR:580, speed:0.0020, angle:3.67, tilt:0.52, waveCount:4,
       desc:'Modular QM/MM framework bridging ORCA/Gaussian with AMBER/DL_POLY. Used for enzyme active-site QM/MM geometry optimization and reaction mechanisms.',
       use:'Enzyme QM/MM · Active Site Reactivity · QM/MM Optimisation' },
   ];
@@ -397,19 +397,20 @@
     }
     if(p.hasSpot){ p.spot = { xFrac:-0.05+rng()*0.25, yFrac:-0.05+rng()*0.18, rFrac:0.16+rng()*0.06 }; }
   });
+  const MAX_PLANET_R = Math.max(...PLANETS.map(p=>p.r));
 
   /* ── Star field: plain, simple, twinkling dots — like a clean illustrated night sky ── */
   let stars = [];
   function buildStars(){
     stars = [];
-    for(let i=0;i<90;i++){
+    for(let i=0;i<260;i++){
       stars.push({ x:Math.random()*W, y:Math.random()*H,
-        r:Math.random()*1.1+0.5, base:Math.random()*0.5+0.35,
+        r:Math.random()*1.0+0.4, base:Math.random()*0.5+0.3,
         twinkleSpeed:Math.random()*0.03+0.006, phase:Math.random()*Math.PI*2 });
     }
-    for(let i=0;i<14;i++){
+    for(let i=0;i<45;i++){
       stars.push({ x:Math.random()*W, y:Math.random()*H,
-        r:Math.random()*1.3+1.4, base:Math.random()*0.3+0.6,
+        r:Math.random()*1.3+1.3, base:Math.random()*0.3+0.55,
         twinkleSpeed:Math.random()*0.04+0.015, phase:Math.random()*Math.PI*2 });
     }
   }
@@ -429,16 +430,20 @@
     ctx.save();
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
-    ctx.strokeStyle = isActive ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)';
-    ctx.lineWidth   = isActive ? 1.6 : 1;
+    ctx.strokeStyle = isActive ? p.color + 'b0' : p.color + '40';
+    ctx.lineWidth   = isActive ? 1.8 : 1;
     ctx.stroke();
     ctx.restore();
   }
 
   /* ── Sun: a bright spiky burst, bleeding off the extreme left edge ── */
-  function drawSun(scaleIn){
-    const s = Math.min(scaleIn, 1.85);
-    const coreR = 92 * s;
+  function drawSun(bScale){
+    // Sized directly off the biggest planet's actual rendered radius (not the orbit-fit scale)
+    // so the Sun is always, guaranteed, visibly bigger than every planet — at any screen size —
+    // but kept modest enough that it doesn't crowd into the innermost orbit's path.
+    const maxPlanetR = MAX_PLANET_R * bScale;
+    const coreR = maxPlanetR * 1.25;
+    const s = coreR / 66; // keep label/selection-ring sizing proportional to the core
     const outerR = coreR * 1.55;
     const innerR = coreR * 1.06;
     const points = 26;
@@ -471,14 +476,13 @@
     }
     ctx.restore();
 
-    // Label — placed where it stays on-screen even when most of the Sun is cropped off the left
-    const labelX = Math.max(cx + coreR*0.15, 46);
+    // Label — centered on the sun, since it's no longer cropped off-canvas
     ctx.save();
-    ctx.fillStyle='#ffffff';
-    ctx.font=`bold ${Math.round(15*s)}px Inter,sans-serif`;
-    ctx.textAlign='left'; ctx.textBaseline='middle';
-    ctx.fillText('CCMM', labelX, cy - 9*s);
-    ctx.fillText('LAB',  labelX, cy + 9*s);
+    ctx.fillStyle='#1a0a00';
+    ctx.font=`bold ${Math.round(14*s)}px Inter,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('CCMM', cx, cy - 8*s);
+    ctx.fillText('LAB',  cx, cy + 8*s);
     ctx.restore();
   }
 
@@ -490,22 +494,20 @@
     };
   }
 
-  /* ── Draw one planet: flat colour + a few gentle terrain/cloud lines, like the reference art ── */
-  function drawPlanet(p, scale, isActive){
+  /* ── Draw one planet: a real 3D-lit sphere — coloured surface, gentle terrain bands, and directional shading ── */
+  function drawPlanet(p, scale, bScale, isActive){
     const pos = getPos(p, scale);
     const pulse = isActive ? 4 : Math.sin(t*2 + p.angle)*1.2;
-    const r = p.r * scale + pulse;
+    const r = p.r * bScale + pulse;
 
-    // subtle halo only when hovered/selected (keeps default look flat & clean)
-    if(isActive){
-      ctx.save();
-      const atm = ctx.createRadialGradient(pos.x,pos.y,r*0.6,pos.x,pos.y,r*1.7);
-      atm.addColorStop(0, p.glow+'55');
-      atm.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.beginPath(); ctx.arc(pos.x,pos.y,r*1.7,0,Math.PI*2);
-      ctx.fillStyle=atm; ctx.fill();
-      ctx.restore();
-    }
+    // soft glow behind every planet, brighter when hovered/selected — gives real depth/lift off the background
+    ctx.save();
+    const atm = ctx.createRadialGradient(pos.x,pos.y,r*0.55,pos.x,pos.y,r*(isActive?1.9:1.55));
+    atm.addColorStop(0, p.glow + (isActive ? '70' : '45'));
+    atm.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath(); ctx.arc(pos.x,pos.y,r*(isActive?1.9:1.55),0,Math.PI*2);
+    ctx.fillStyle=atm; ctx.fill();
+    ctx.restore();
 
     // Saturn-style ring, back half (drawn behind the body)
     if(p.hasRing){
@@ -517,14 +519,26 @@
       ctx.restore();
     }
 
-    // Flat body, clipped, with a couple of gentle wavy bands
+    // Body, clipped, with a drop-shadow so it visibly lifts off the surface behind it
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur  = r*0.5;
+    ctx.shadowOffsetX = r*0.12;
+    ctx.shadowOffsetY = r*0.16;
+    ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2);
+    ctx.fillStyle = p.glow;
+    ctx.fill();
+    ctx.restore();
+
     ctx.save();
     ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.clip();
     ctx.translate(pos.x,pos.y);
 
-    const baseG = ctx.createRadialGradient(-r*0.28,-r*0.32,r*0.08,0,0,r*1.05);
-    baseG.addColorStop(0, p.color);
-    baseG.addColorStop(1, p.glow);
+    const baseG = ctx.createRadialGradient(-r*0.32,-r*0.36,r*0.06,0,0,r*1.05);
+    baseG.addColorStop(0, '#ffffff');
+    baseG.addColorStop(0.22, p.color);
+    baseG.addColorStop(0.7,  p.glow);
+    baseG.addColorStop(1,    p.glow);
     ctx.fillStyle = baseG;
     ctx.fillRect(-r,-r,r*2,r*2);
 
@@ -545,18 +559,26 @@
       ctx.fill();
     }
 
-    // faint top-left sheen to keep just a touch of roundness
-    const sheen = ctx.createRadialGradient(-r*0.35,-r*0.4,0,-r*0.35,-r*0.4,r*1.1);
-    sheen.addColorStop(0,'rgba(255,255,255,0.22)');
-    sheen.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=sheen; ctx.fillRect(-r,-r,r*2,r*2);
+    // Strong directional highlight (light from the Sun's side) — this is what makes it read as 3D
+    const hi = ctx.createRadialGradient(-r*0.38,-r*0.42,0,-r*0.38,-r*0.42,r*1.2);
+    hi.addColorStop(0,'rgba(255,255,255,0.65)');
+    hi.addColorStop(0.45,'rgba(255,255,255,0.18)');
+    hi.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=hi; ctx.fillRect(-r,-r,r*2,r*2);
+
+    // Matching shadowed far side
+    const sh = ctx.createRadialGradient(r*0.42,r*0.46,0,r*0.42,r*0.46,r*1.35);
+    sh.addColorStop(0,'rgba(0,0,0,0.55)');
+    sh.addColorStop(0.55,'rgba(0,0,0,0.18)');
+    sh.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sh; ctx.fillRect(-r,-r,r*2,r*2);
 
     ctx.restore();
 
-    // crisp flat outline
+    // crisp rim-light edge
     ctx.save();
     ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2);
-    ctx.strokeStyle = p.glow+'aa'; ctx.lineWidth = 1;
+    ctx.strokeStyle = p.color+'cc'; ctx.lineWidth = 1.2;
     ctx.stroke();
     ctx.restore();
 
@@ -574,7 +596,7 @@
     ctx.save();
     ctx.globalAlpha = isActive ? 1 : 0.92;
     ctx.fillStyle = '#ffffff';
-    ctx.font = `${isActive?'bold ':''}${Math.max(11, Math.floor(13*Math.min(scale,1.4)))}px Inter,sans-serif`;
+    ctx.font = `${isActive?'bold ':''}${Math.max(11, Math.floor(13*Math.min(bScale,1.4)))}px Inter,sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='top';
     ctx.fillText(p.name, pos.x, pos.y + r + 6);
     ctx.restore();
@@ -586,21 +608,27 @@
     W = canvas.width  = rect.width  || 900;
     H = canvas.height = Math.max(520, Math.min(Math.round(W * 0.62), 680));
     canvas.style.height = H+'px';
-    // Sun sits at the extreme left edge, mostly bleeding off-canvas — like the reference art —
-    // so the orbits sweep across almost the entire frame from left to right.
-    cx = Math.max(W*0.025, 25);
-    cy = H*0.52;
+    // Sun back at the center — every orbit needs to fit fully on both sides now.
+    cx = W*0.5;
+    cy = H*0.5;
     buildStars();
   }
 
   function getScale(){
-    // Fit the outermost orbit (480) using the OPEN side of the Sun, not the cramped one.
-    // No upper cap — the system grows to actually fill the freed-up space.
-    const maxOrbit  = 480;
-    const rightSpace = W - cx;
-    const vertFit   = Math.min(cy, H-cy) / 0.38;
-    const maxFit    = Math.min(rightSpace, vertFit) * 0.94;
+    // Symmetric fit: every orbit must stay fully on-screen in all directions, but with
+    // minimal padding now — the rings should spread out to use almost the whole frame.
+    const maxOrbit = 580;
+    const pad = 12;
+    const horizFit = Math.max(40, cx - pad);
+    const vertFit  = Math.max(40, (cy - pad) / 0.38);
+    const maxFit   = Math.min(horizFit, vertFit);
     return maxFit / maxOrbit;
+  }
+
+  function getBodyScale(scale){
+    // Planets stay visually big and consistent even when the orbit layout itself is
+    // tight (e.g. small screens), while still shrinking gracefully when truly cramped.
+    return Math.min(1.6, Math.max(0.85, scale*2.0));
   }
 
   /* ── Hit testing ── */
@@ -608,16 +636,18 @@
 
   function hitSun(mx,my){
     const dx=mx-cx, dy=my-cy;
-    const s = Math.min(getScale(), 1.85);
-    return Math.sqrt(dx*dx+dy*dy) <= 96*s;
+    const bScale = getBodyScale(getScale());
+    const coreR = MAX_PLANET_R * bScale * 1.25;
+    return Math.sqrt(dx*dx+dy*dy) <= coreR * 1.55;
   }
 
   function getHit(mx,my){
     const scale = getScale();
+    const bScale = getBodyScale(scale);
     for(let i=0;i<PLANETS.length;i++){
       const pos=getPos(PLANETS[i],scale);
       const dx=mx-pos.x, dy=my-pos.y;
-      if(Math.sqrt(dx*dx+dy*dy) <= PLANETS[i].r*scale+14) return i;
+      if(Math.sqrt(dx*dx+dy*dy) <= PLANETS[i].r*bScale+14) return i;
     }
     return -1;
   }
@@ -688,6 +718,7 @@
     drawStars();
 
     const scale=getScale();
+    const bScale=getBodyScale(scale);
 
     // Draw all orbit rings first (behind planets)
     PLANETS.forEach((p,i)=>drawOrbitRing(p,scale,i===hoveredIdx||i===selectedIdx));
@@ -695,11 +726,11 @@
     // Update angles and draw planets
     PLANETS.forEach((p,i)=>{
       p.angle+=p.speed;
-      drawPlanet(p,scale,i===hoveredIdx||i===selectedIdx);
+      drawPlanet(p,scale,bScale,i===hoveredIdx||i===selectedIdx);
     });
 
     // Sun on top
-    drawSun(scale);
+    drawSun(bScale);
 
     // Hint
     ctx.save();
