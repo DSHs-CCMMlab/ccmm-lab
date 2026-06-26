@@ -325,6 +325,7 @@
   const canvas = document.getElementById('solarCanvas');
   const ctx    = canvas.getContext('2d');
   let W, H, t = 0;
+  let cx, cy; // sun center — sits at the extreme left edge, partly bleeding off-canvas
 
   /* ── Each planet gets its OWN dedicated orbit ring ─────────────────
      orbitR  = radius of its circular orbit
@@ -334,234 +335,248 @@
      ────────────────────────────────────────────────────────────────── */
   const PLANETS = [
     { name:'Gaussian 16',  icon:'⚛️',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
-      color:'#60a5fa', glow:'#3b82f6', r:22, orbitR: 95, speed:0.0095, angle:0.0,  tilt:0.38,
+      color:'#7fb3ff', glow:'#3b6fd6', r:30, orbitR: 95, speed:0.0095, angle:0.0,  tilt:0.38, waveCount:3,
       desc:'Industry-standard DFT package for geometry optimizations, transition state searches, NBO analysis, and thermochemistry on metal–oxo and organic systems.',
       use:'DFT · IRC · NBO · TD-DFT · Thermochemistry' },
 
     { name:'ORCA',         icon:'🔬',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
-      color:'#818cf8', glow:'#6366f1', r:19, orbitR:150, speed:0.0072, angle:1.05, tilt:0.38,
+      color:'#a6a0ff', glow:'#6a5fd1', r:27, orbitR:150, speed:0.0072, angle:1.05, tilt:0.38, waveCount:3,
       desc:'Powerful open-shell QM package. Used for high-accuracy DLPNO-CCSD(T), CASSCF, EPR/NMR spectra, and spin density analysis on iron–oxo complexes.',
       use:'DLPNO-CCSD(T) · CASSCF · EPR/NMR · Spin Densities' },
 
     { name:'Turbomole',    icon:'🧮',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
-      color:'#a78bfa', glow:'#8b5cf6', r:17, orbitR:205, speed:0.0058, angle:3.67, tilt:0.38,
+      color:'#caa6ff', glow:'#8a63d6', r:24, orbitR:205, speed:0.0058, angle:3.67, tilt:0.38, waveCount:3,
       desc:'Efficient QM program with RI approximations. Used for large-system DFT, TDDFT excited states, and fast geometry optimizations.',
       use:'RI-DFT · TDDFT · Large System QM' },
 
     { name:'AMBER 24',     icon:'🌊',  cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#34d399', glow:'#059669', r:21, orbitR:260, speed:0.0045, angle:0.52, tilt:0.38,
+      color:'#7fe6c1', glow:'#1f9e74', r:32, orbitR:260, speed:0.0045, angle:0.52, tilt:0.38, waveCount:5,
       desc:'Premier biomolecular MD suite. Protein–ligand MD, MM-GBSA/FEP binding free energies, QM/MM system preparation with GPU acceleration.',
       use:'Protein MD · MM-GBSA · FEP · QM/MM Prep' },
 
     { name:'GROMACS',      icon:'⚡',  cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#6ee7b7', glow:'#10b981', r:18, orbitR:315, speed:0.0036, angle:2.62, tilt:0.38,
+      color:'#9be8b8', glow:'#2a9d6a', r:28, orbitR:315, speed:0.0036, angle:2.62, tilt:0.38, waveCount:5, hasRing:true,
       desc:'Fastest open-source MD engine. Used for metadynamics, umbrella sampling, PMF calculations, and large-scale comparative MD studies.',
       use:'MD · Metadynamics · Umbrella Sampling · PMF' },
 
     { name:'NAMD',         icon:'🧬',  cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#10b981', glow:'#065f46', r:16, orbitR:370, speed:0.0029, angle:4.71, tilt:0.38,
+      color:'#7fd9a8', glow:'#1d7f55', r:25, orbitR:370, speed:0.0029, angle:4.71, tilt:0.38, waveCount:4,
       desc:'High-performance parallel MD for large biomolecular systems, membrane proteins, and nucleic acids. Used alongside VMD for trajectory visualization.',
       use:'Steered MD · Membrane Simulations · Large Systems' },
 
     { name:'AutoDock-GPU', icon:'🎯',  cat:'Molecular Docking',  catColor:'#fb923c',
-      color:'#fb923c', glow:'#ea580c', r:20, orbitR:425, speed:0.0024, angle:1.05, tilt:0.38,
+      color:'#ffc488', glow:'#d9670f', r:31, orbitR:425, speed:0.0024, angle:1.05, tilt:0.38, waveCount:5, hasSpot:true,
       desc:'GPU-accelerated virtual screening suite. Screens millions of compounds from ZINC/PubChem against biological targets — orders of magnitude faster than CPU runs.',
       use:'Virtual Screening · Binding Pose · Pharmacophore' },
 
     { name:'ChemShell',    icon:'🔗',  cat:'QM/MM',              catColor:'#f472b6',
-      color:'#f472b6', glow:'#db2777', r:18, orbitR:480, speed:0.0020, angle:3.67, tilt:0.38,
+      color:'#ff9fc9', glow:'#cf3d80', r:26, orbitR:480, speed:0.0020, angle:3.67, tilt:0.38, waveCount:4,
       desc:'Modular QM/MM framework bridging ORCA/Gaussian with AMBER/DL_POLY. Used for enzyme active-site QM/MM geometry optimization and reaction mechanisms.',
       use:'Enzyme QM/MM · Active Site Reactivity · QM/MM Optimisation' },
   ];
 
-  /* ── Star field: 3 layers ── */
+  /* ── Pre-compute each planet's fixed surface texture (seeded, so it never flickers frame-to-frame) ──
+     Flat illustration style: a handful of gently curved horizontal "terrain/cloud" lines,
+     same idea used on every planet in the reference art — just fewer & thinner on smaller bodies. */
+  function seededRng(seed){
+    let s = seed % 2147483647; if(s<=0) s += 2147483646;
+    return function(){ s = s*16807 % 2147483647; return (s-1)/2147483646; };
+  }
+  PLANETS.forEach((p,i)=>{
+    const rng = seededRng(917 + i*131);
+    const n = p.waveCount || 3;
+    p.waves = [];
+    for(let k=0;k<n;k++){
+      p.waves.push({
+        yFrac: -0.72 + (k/(Math.max(n-1,1)))*1.44 + (rng()-0.5)*0.10,
+        bow:   (rng()-0.5)*0.6,
+        thick: 0.045 + rng()*0.06,
+        lighter: rng() < 0.5,
+        alpha: 0.16 + rng()*0.16
+      });
+    }
+    if(p.hasSpot){ p.spot = { xFrac:-0.05+rng()*0.25, yFrac:-0.05+rng()*0.18, rFrac:0.16+rng()*0.06 }; }
+  });
+
+  /* ── Star field: plain, simple, twinkling dots — like a clean illustrated night sky ── */
   let stars = [];
   function buildStars(){
     stars = [];
-    // Layer 1: tiny dim distant stars
-    for(let i=0;i<300;i++){
+    for(let i=0;i<90;i++){
       stars.push({ x:Math.random()*W, y:Math.random()*H,
-        r:Math.random()*0.7+0.2, base:Math.random()*0.35+0.1,
-        twinkleSpeed:Math.random()*0.03+0.005, phase:Math.random()*Math.PI*2, layer:0 });
+        r:Math.random()*1.1+0.5, base:Math.random()*0.5+0.35,
+        twinkleSpeed:Math.random()*0.03+0.006, phase:Math.random()*Math.PI*2 });
     }
-    // Layer 2: medium stars
-    for(let i=0;i<120;i++){
+    for(let i=0;i<14;i++){
       stars.push({ x:Math.random()*W, y:Math.random()*H,
-        r:Math.random()*1.1+0.6, base:Math.random()*0.5+0.25,
-        twinkleSpeed:Math.random()*0.04+0.01, phase:Math.random()*Math.PI*2, layer:1 });
-    }
-    // Layer 3: bright foreground stars with cross-glow
-    for(let i=0;i<30;i++){
-      stars.push({ x:Math.random()*W, y:Math.random()*H,
-        r:Math.random()*1.8+1.2, base:Math.random()*0.6+0.4,
-        twinkleSpeed:Math.random()*0.05+0.02, phase:Math.random()*Math.PI*2, layer:2 });
+        r:Math.random()*1.3+1.4, base:Math.random()*0.3+0.6,
+        twinkleSpeed:Math.random()*0.04+0.015, phase:Math.random()*Math.PI*2 });
     }
   }
-
   function drawStars(){
     stars.forEach(s=>{
-      const alpha = s.base + Math.sin(t * s.twinkleSpeed * 60 + s.phase) * s.base * 0.5;
-      ctx.save();
-      if(s.layer===2){
-        // cross spike for bright stars
-        ctx.strokeStyle=`rgba(255,255,255,${alpha*0.6})`;
-        ctx.lineWidth=0.5;
-        [-1,1].forEach(dir=>{
-          ctx.beginPath();
-          ctx.moveTo(s.x - s.r*3*dir, s.y);
-          ctx.lineTo(s.x + s.r*3*dir, s.y);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(s.x, s.y - s.r*3*dir);
-          ctx.lineTo(s.x, s.y + s.r*3*dir);
-          ctx.stroke();
-        });
-      }
+      const alpha = Math.max(0, s.base + Math.sin(t*s.twinkleSpeed*60+s.phase)*s.base*0.4);
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
       ctx.fillStyle=`rgba(255,255,255,${alpha})`;
       ctx.fill();
-      ctx.restore();
     });
   }
 
-  /* ── Nebula background glow blobs ── */
-  function drawNebula(){
-    const blobs = [
-      { x:W*0.15, y:H*0.25, r:W*0.18, c:'rgba(59,130,246,0.045)' },
-      { x:W*0.80, y:H*0.70, r:W*0.22, c:'rgba(139,92,246,0.04)'  },
-      { x:W*0.50, y:H*0.85, r:W*0.16, c:'rgba(16,185,129,0.035)' },
-      { x:W*0.70, y:H*0.15, r:W*0.14, c:'rgba(244,114,182,0.035)'},
-    ];
-    blobs.forEach(b=>{
-      const g = ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-      g.addColorStop(0, b.c);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.save();
-      ctx.fillStyle=g;
-      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    });
-  }
-
-  /* ── Single orbit ring for each planet ── */
+  /* ── Single orbit path for each planet — thin, pale, simple (just like the reference) ── */
   function drawOrbitRing(p, scale, isActive){
     const rx = p.orbitR * scale;
     const ry = p.orbitR * scale * p.tilt;
     ctx.save();
-    // Outer soft glow ring
     ctx.beginPath();
-    ctx.ellipse(W/2, H/2, rx, ry, 0, 0, Math.PI*2);
-    ctx.strokeStyle = p.color + '18';
-    ctx.lineWidth = 6;
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+    ctx.strokeStyle = isActive ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.22)';
+    ctx.lineWidth   = isActive ? 1.6 : 1;
     ctx.stroke();
-    // Main visible ring
-    ctx.beginPath();
-    ctx.ellipse(W/2, H/2, rx, ry, 0, 0, Math.PI*2);
-    ctx.strokeStyle = isActive ? p.color + 'cc' : p.color + '70';
-    ctx.lineWidth = isActive ? 1.8 : 1.2;
-    ctx.setLineDash([6,4]);
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur  = isActive ? 10 : 4;
-    ctx.stroke();
-    ctx.setLineDash([]);
     ctx.restore();
   }
 
-  /* ── Sun ── */
-  function drawSun(){
-    const cx=W/2, cy=H/2;
-    // Corona pulses
-    const corona = 32 + Math.sin(t*1.5)*4;
-    [corona+28, corona+14, corona].forEach((gr,i)=>{
-      const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,gr);
-      grd.addColorStop(0, `rgba(255,220,60,${0.22-i*0.055})`);
-      grd.addColorStop(0.6,`rgba(255,160,0,${0.06-i*0.015})`);
-      grd.addColorStop(1,  'rgba(255,100,0,0)');
-      ctx.beginPath(); ctx.arc(cx,cy,gr,0,Math.PI*2);
-      ctx.fillStyle=grd; ctx.fill();
-    });
-    // Core
+  /* ── Sun: a bright spiky burst, bleeding off the extreme left edge ── */
+  function drawSun(scaleIn){
+    const s = Math.min(scaleIn, 1.85);
+    const coreR = 92 * s;
+    const outerR = coreR * 1.55;
+    const innerR = coreR * 1.06;
+    const points = 26;
+
     ctx.save();
-    ctx.shadowColor='#ffd700'; ctx.shadowBlur=40;
-    const sg = ctx.createRadialGradient(cx-8,cy-8,2,cx,cy,corona);
-    sg.addColorStop(0,'#fff9c4');
-    sg.addColorStop(0.4,'#fde047');
-    sg.addColorStop(1,'#f59e0b');
-    ctx.beginPath(); ctx.arc(cx,cy,corona,0,Math.PI*2);
-    ctx.fillStyle=sg; ctx.fill();
-    ctx.restore();
-    // Extra glow ring when sun is selected
+    ctx.translate(cx, cy);
+    ctx.beginPath();
+    for(let i=0;i<points*2;i++){
+      const ang = (i/(points*2))*Math.PI*2;
+      const rad = (i%2===0) ? outerR : innerR;
+      const x = Math.cos(ang)*rad, y = Math.sin(ang)*rad;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    const grad = ctx.createRadialGradient(-coreR*0.25,-coreR*0.25,coreR*0.1,0,0,outerR);
+    grad.addColorStop(0,   '#ffe28a');
+    grad.addColorStop(0.35,'#ffb236');
+    grad.addColorStop(0.7, '#ff7a18');
+    grad.addColorStop(1,   '#e0440c');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
     if(sunSelected){
       ctx.save();
-      ctx.beginPath(); ctx.arc(cx,cy,corona+18,0,Math.PI*2);
-      ctx.strokeStyle='rgba(255,220,60,0.6)';
-      ctx.lineWidth=2.5;
-      ctx.shadowColor='#ffd700'; ctx.shadowBlur=20;
+      ctx.beginPath(); ctx.arc(0,0,outerR+10*s,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,220,120,0.7)';
+      ctx.lineWidth=3;
       ctx.stroke();
       ctx.restore();
     }
-    // Label
+    ctx.restore();
+
+    // Label — placed where it stays on-screen even when most of the Sun is cropped off the left
+    const labelX = Math.max(cx + coreR*0.15, 46);
     ctx.save();
-    ctx.fillStyle='#1a0a00';
-    ctx.font='bold 10px Inter,sans-serif';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('CCMM',cx,cy-5);
-    ctx.fillText('LAB', cx,cy+7);
+    ctx.fillStyle='#ffffff';
+    ctx.font=`bold ${Math.round(15*s)}px Inter,sans-serif`;
+    ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText('CCMM', labelX, cy - 9*s);
+    ctx.fillText('LAB',  labelX, cy + 9*s);
     ctx.restore();
   }
 
   /* ── Planet position (elliptical orbit) ── */
   function getPos(p, scale){
     return {
-      x: W/2 + Math.cos(p.angle) * p.orbitR * scale,
-      y: H/2 + Math.sin(p.angle) * p.orbitR * scale * p.tilt,
+      x: cx + Math.cos(p.angle) * p.orbitR * scale,
+      y: cy + Math.sin(p.angle) * p.orbitR * scale * p.tilt,
     };
   }
 
-  /* ── Draw one planet ── */
+  /* ── Draw one planet: flat colour + a few gentle terrain/cloud lines, like the reference art ── */
   function drawPlanet(p, scale, isActive){
     const pos = getPos(p, scale);
-    const pulse = isActive ? 5 : Math.sin(t*2.5 + p.angle)*1.5;
+    const pulse = isActive ? 4 : Math.sin(t*2 + p.angle)*1.2;
     const r = p.r * scale + pulse;
 
-    // Atmosphere glow
+    // subtle halo only when hovered/selected (keeps default look flat & clean)
+    if(isActive){
+      ctx.save();
+      const atm = ctx.createRadialGradient(pos.x,pos.y,r*0.6,pos.x,pos.y,r*1.7);
+      atm.addColorStop(0, p.glow+'55');
+      atm.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath(); ctx.arc(pos.x,pos.y,r*1.7,0,Math.PI*2);
+      ctx.fillStyle=atm; ctx.fill();
+      ctx.restore();
+    }
+
+    // Saturn-style ring, back half (drawn behind the body)
+    if(p.hasRing){
+      ctx.save();
+      ctx.translate(pos.x,pos.y); ctx.rotate(-0.36);
+      ctx.beginPath(); ctx.ellipse(0,0,r*1.95,r*0.6,0,Math.PI*0.06,Math.PI*0.94);
+      ctx.strokeStyle = p.color+'cc'; ctx.lineWidth = Math.max(2,r*0.16);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Flat body, clipped, with a couple of gentle wavy bands
     ctx.save();
-    const atm = ctx.createRadialGradient(pos.x, pos.y, r*0.5, pos.x, pos.y, r*2.2);
-    atm.addColorStop(0, p.glow+'55');
-    atm.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.beginPath(); ctx.arc(pos.x, pos.y, r*2.2, 0, Math.PI*2);
-    ctx.fillStyle=atm; ctx.fill();
+    ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.clip();
+    ctx.translate(pos.x,pos.y);
+
+    const baseG = ctx.createRadialGradient(-r*0.28,-r*0.32,r*0.08,0,0,r*1.05);
+    baseG.addColorStop(0, p.color);
+    baseG.addColorStop(1, p.glow);
+    ctx.fillStyle = baseG;
+    ctx.fillRect(-r,-r,r*2,r*2);
+
+    p.waves.forEach(w=>{
+      const yBase = w.yFrac*r;
+      ctx.beginPath();
+      ctx.moveTo(-r, yBase);
+      ctx.quadraticCurveTo(0, yBase + w.bow*r, r, yBase);
+      ctx.lineWidth = Math.max(1, w.thick*r);
+      ctx.strokeStyle = w.lighter ? `rgba(255,255,255,${w.alpha})` : `rgba(0,0,0,${w.alpha})`;
+      ctx.stroke();
+    });
+
+    if(p.spot){
+      const sx=p.spot.xFrac*r, sy=p.spot.yFrac*r, sr=Math.max(1.5,p.spot.rFrac*r);
+      ctx.beginPath(); ctx.ellipse(sx,sy,sr,sr*0.7,0,0,Math.PI*2);
+      ctx.fillStyle='rgba(110,30,25,0.5)';
+      ctx.fill();
+    }
+
+    // faint top-left sheen to keep just a touch of roundness
+    const sheen = ctx.createRadialGradient(-r*0.35,-r*0.4,0,-r*0.35,-r*0.4,r*1.1);
+    sheen.addColorStop(0,'rgba(255,255,255,0.22)');
+    sheen.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=sheen; ctx.fillRect(-r,-r,r*2,r*2);
+
     ctx.restore();
 
-    // Planet body — radial gradient for 3D look
+    // crisp flat outline
     ctx.save();
-    ctx.shadowColor=p.glow; ctx.shadowBlur = isActive ? 30 : 16;
-    const pg = ctx.createRadialGradient(pos.x-r*0.3, pos.y-r*0.35, r*0.05, pos.x, pos.y, r);
-    pg.addColorStop(0,  '#ffffff');
-    pg.addColorStop(0.25, p.color);
-    pg.addColorStop(0.7,  p.glow);
-    pg.addColorStop(1,    p.glow+'99');
-    ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2);
-    ctx.fillStyle=pg; ctx.fill();
+    ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2);
+    ctx.strokeStyle = p.glow+'aa'; ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.restore();
 
-    // Icon on planet
-    ctx.save();
-    ctx.font=`${Math.floor(r*1.0)}px serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(p.icon, pos.x, pos.y);
-    ctx.restore();
+    // Saturn-style ring, front half (drawn in front of the body)
+    if(p.hasRing){
+      ctx.save();
+      ctx.translate(pos.x,pos.y); ctx.rotate(-0.36);
+      ctx.beginPath(); ctx.ellipse(0,0,r*1.95,r*0.6,0,Math.PI*1.06,Math.PI*1.94);
+      ctx.strokeStyle = p.color+'ee'; ctx.lineWidth = Math.max(2,r*0.16);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // Name label
     ctx.save();
-    ctx.globalAlpha = isActive ? 1 : 0.82;
-    ctx.fillStyle = isActive ? p.color : '#ccddf5';
-    ctx.font = `${isActive?'bold ':''}${Math.max(9, Math.floor(11*scale))}px Inter,sans-serif`;
+    ctx.globalAlpha = isActive ? 1 : 0.92;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `${isActive?'bold ':''}${Math.max(11, Math.floor(13*Math.min(scale,1.4)))}px Inter,sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.shadowColor = isActive ? p.glow : 'transparent';
-    ctx.shadowBlur  = isActive ? 8 : 0;
-    ctx.fillText(p.name, pos.x, pos.y + r + 5);
+    ctx.fillText(p.name, pos.x, pos.y + r + 6);
     ctx.restore();
   }
 
@@ -569,25 +584,32 @@
   function resize(){
     const rect = canvas.parentElement.getBoundingClientRect();
     W = canvas.width  = rect.width  || 900;
-    // Height: enough to show outermost orbit (480 * 0.38 * 2 + margin)
     H = canvas.height = Math.max(520, Math.min(Math.round(W * 0.62), 680));
     canvas.style.height = H+'px';
+    // Sun sits at the extreme left edge, mostly bleeding off-canvas — like the reference art —
+    // so the orbits sweep across almost the entire frame from left to right.
+    cx = Math.max(W*0.025, 25);
+    cy = H*0.52;
     buildStars();
   }
 
   function getScale(){
-    // scale so the outermost orbit (480) fits with padding
-    const maxOrbit = 480;
-    const maxFit   = Math.min(W, H) * 0.47;
-    return Math.min(1, maxFit / maxOrbit);
+    // Fit the outermost orbit (480) using the OPEN side of the Sun, not the cramped one.
+    // No upper cap — the system grows to actually fill the freed-up space.
+    const maxOrbit  = 480;
+    const rightSpace = W - cx;
+    const vertFit   = Math.min(cy, H-cy) / 0.38;
+    const maxFit    = Math.min(rightSpace, vertFit) * 0.94;
+    return maxFit / maxOrbit;
   }
 
   /* ── Hit testing ── */
   let hoveredIdx=-1, selectedIdx=-1, sunSelected=false;
 
   function hitSun(mx,my){
-    const dx=mx-W/2, dy=my-H/2;
-    return Math.sqrt(dx*dx+dy*dy) <= 40;
+    const dx=mx-cx, dy=my-cy;
+    const s = Math.min(getScale(), 1.85);
+    return Math.sqrt(dx*dx+dy*dy) <= 96*s;
   }
 
   function getHit(mx,my){
@@ -595,7 +617,7 @@
     for(let i=0;i<PLANETS.length;i++){
       const pos=getPos(PLANETS[i],scale);
       const dx=mx-pos.x, dy=my-pos.y;
-      if(Math.sqrt(dx*dx+dy*dy) <= PLANETS[i].r*scale+12) return i;
+      if(Math.sqrt(dx*dx+dy*dy) <= PLANETS[i].r*scale+14) return i;
     }
     return -1;
   }
@@ -658,12 +680,11 @@
     t+=0.016;
     ctx.clearRect(0,0,W,H);
 
-    // Deep space background
-    const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.75);
-    bg.addColorStop(0,'#0d1535'); bg.addColorStop(0.5,'#080e22'); bg.addColorStop(1,'#030509');
+    // Clean navy-blue sky, lighter near the Sun, darker toward the far edge
+    const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.95);
+    bg.addColorStop(0,'#1c3a66'); bg.addColorStop(0.45,'#102449'); bg.addColorStop(1,'#040a18');
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-    drawNebula();
     drawStars();
 
     const scale=getScale();
@@ -678,11 +699,11 @@
     });
 
     // Sun on top
-    drawSun();
+    drawSun(scale);
 
     // Hint
     ctx.save();
-    ctx.globalAlpha=0.35; ctx.fillStyle='#6080b0';
+    ctx.globalAlpha=0.4; ctx.fillStyle='#bcd0f0';
     ctx.font='11px Inter,sans-serif'; ctx.textAlign='center';
     ctx.fillText('✦  Click any planet or the Sun to explore  ✦', W/2, H-12);
     ctx.restore();
