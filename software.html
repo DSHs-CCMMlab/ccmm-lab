@@ -324,248 +324,373 @@
 (function(){
   const canvas = document.getElementById('solarCanvas');
   const ctx    = canvas.getContext('2d');
-  let W, H, animId, t = 0;
+  let W, H, t = 0;
 
-  const TOOLS = [
-    {
-      name:'Gaussian 16', icon:'⚛️', cat:'Quantum Chemistry', catColor:'#60a5fa',
-      color:'#60a5fa', r:22, orbitR:0, speed:0,
+  /* ── Each planet gets its OWN dedicated orbit ring ─────────────────
+     orbitR  = radius of its circular orbit
+     angle   = starting angle (radians)
+     speed   = angular velocity per frame
+     tilt    = vertical squash factor (1.0 = circle, 0.38 = ellipse)
+     ────────────────────────────────────────────────────────────────── */
+  const PLANETS = [
+    { name:'Gaussian 16',  icon:'⚛️',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
+      color:'#60a5fa', glow:'#3b82f6', r:22, orbitR: 95, speed:0.0095, angle:0.0,  tilt:0.38,
       desc:'Industry-standard DFT package for geometry optimizations, transition state searches, NBO analysis, and thermochemistry on metal–oxo and organic systems.',
-      use:'DFT · IRC · NBO · TD-DFT · Thermochemistry'
-    },
-    {
-      name:'ORCA', icon:'🔬', cat:'Quantum Chemistry', catColor:'#60a5fa',
-      color:'#818cf8', r:20, orbitR:110, speed:0.008, angle:0,
-      desc:'Powerful open-shell QM package. Used for high-accuracy DLPNO-CCSD(T), CASSCF multireference, EPR/NMR spectra, and spin density analysis on iron–oxo complexes.',
-      use:'DLPNO-CCSD(T) · CASSCF · EPR/NMR · Spin Densities'
-    },
-    {
-      name:'Turbomole', icon:'🧮', cat:'Quantum Chemistry', catColor:'#60a5fa',
-      color:'#a78bfa', r:18, orbitR:110, speed:0.008, angle:2.1,
-      desc:'Efficient QM program with RI approximations. Used for large-system DFT, TDDFT excited states, and geometry optimizations where speed is critical.',
-      use:'RI-DFT · TDDFT · Large System QM'
-    },
-    {
-      name:'AMBER 24', icon:'🌊', cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#34d399', r:21, orbitR:190, speed:0.005, angle:0.5,
-      desc:'Premier biomolecular MD suite. Used for protein–ligand simulations, MM-GBSA binding free energies, FEP calculations, and QM/MM system preparation with GPU acceleration.',
-      use:'Protein MD · MM-GBSA · FEP · QM/MM Prep'
-    },
-    {
-      name:'GROMACS', icon:'⚡', cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#6ee7b7', r:19, orbitR:190, speed:0.005, angle:2.6,
-      desc:'Fastest open-source MD engine. Used for metadynamics, umbrella sampling, PMF calculations, and large-scale comparative MD studies on proteins and ligands.',
-      use:'MD · Metadynamics · Umbrella Sampling · PMF'
-    },
-    {
-      name:'NAMD', icon:'🧬', cat:'Molecular Dynamics', catColor:'#34d399',
-      color:'#10b981', r:17, orbitR:190, speed:0.005, angle:4.8,
-      desc:'High-performance parallel MD for large biomolecular systems. Used for steered MD, membrane proteins, and long trajectory visualisation alongside VMD.',
-      use:'Steered MD · Membrane Simulations · Large Systems'
-    },
-    {
-      name:'AutoDock-GPU', icon:'🎯', cat:'Molecular Docking', catColor:'#fb923c',
-      color:'#fb923c', r:20, orbitR:270, speed:0.0035, angle:1.0,
-      desc:'GPU-accelerated virtual screening suite. Powers the first stage of our drug discovery pipeline — screening millions of compounds from ZINC/PubChem against biological targets.',
-      use:'Virtual Screening · Binding Pose Prediction · Pharmacophore'
-    },
-    {
-      name:'ChemShell', icon:'🔗', cat:'QM/MM', catColor:'#f472b6',
-      color:'#f472b6', r:19, orbitR:270, speed:0.0035, angle:3.7,
-      desc:'Modular QM/MM framework bridging ORCA/Gaussian with AMBER/DL_POLY. Used for enzyme active-site QM/MM geometry optimizations and reaction mechanism studies.',
-      use:'Enzyme QM/MM · Active Site Reactivity · QM/MM Optimisation'
-    },
+      use:'DFT · IRC · NBO · TD-DFT · Thermochemistry' },
+
+    { name:'ORCA',         icon:'🔬',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
+      color:'#818cf8', glow:'#6366f1', r:19, orbitR:150, speed:0.0072, angle:1.05, tilt:0.38,
+      desc:'Powerful open-shell QM package. Used for high-accuracy DLPNO-CCSD(T), CASSCF, EPR/NMR spectra, and spin density analysis on iron–oxo complexes.',
+      use:'DLPNO-CCSD(T) · CASSCF · EPR/NMR · Spin Densities' },
+
+    { name:'Turbomole',    icon:'🧮',  cat:'Quantum Chemistry',  catColor:'#60a5fa',
+      color:'#a78bfa', glow:'#8b5cf6', r:17, orbitR:205, speed:0.0058, angle:3.67, tilt:0.38,
+      desc:'Efficient QM program with RI approximations. Used for large-system DFT, TDDFT excited states, and fast geometry optimizations.',
+      use:'RI-DFT · TDDFT · Large System QM' },
+
+    { name:'AMBER 24',     icon:'🌊',  cat:'Molecular Dynamics', catColor:'#34d399',
+      color:'#34d399', glow:'#059669', r:21, orbitR:260, speed:0.0045, angle:0.52, tilt:0.38,
+      desc:'Premier biomolecular MD suite. Protein–ligand MD, MM-GBSA/FEP binding free energies, QM/MM system preparation with GPU acceleration.',
+      use:'Protein MD · MM-GBSA · FEP · QM/MM Prep' },
+
+    { name:'GROMACS',      icon:'⚡',  cat:'Molecular Dynamics', catColor:'#34d399',
+      color:'#6ee7b7', glow:'#10b981', r:18, orbitR:315, speed:0.0036, angle:2.62, tilt:0.38,
+      desc:'Fastest open-source MD engine. Used for metadynamics, umbrella sampling, PMF calculations, and large-scale comparative MD studies.',
+      use:'MD · Metadynamics · Umbrella Sampling · PMF' },
+
+    { name:'NAMD',         icon:'🧬',  cat:'Molecular Dynamics', catColor:'#34d399',
+      color:'#10b981', glow:'#065f46', r:16, orbitR:370, speed:0.0029, angle:4.71, tilt:0.38,
+      desc:'High-performance parallel MD for large biomolecular systems, membrane proteins, and nucleic acids. Used alongside VMD for trajectory visualization.',
+      use:'Steered MD · Membrane Simulations · Large Systems' },
+
+    { name:'AutoDock-GPU', icon:'🎯',  cat:'Molecular Docking',  catColor:'#fb923c',
+      color:'#fb923c', glow:'#ea580c', r:20, orbitR:425, speed:0.0024, angle:1.05, tilt:0.38,
+      desc:'GPU-accelerated virtual screening suite. Screens millions of compounds from ZINC/PubChem against biological targets — orders of magnitude faster than CPU runs.',
+      use:'Virtual Screening · Binding Pose · Pharmacophore' },
+
+    { name:'ChemShell',    icon:'🔗',  cat:'QM/MM',              catColor:'#f472b6',
+      color:'#f472b6', glow:'#db2777', r:18, orbitR:480, speed:0.0020, angle:3.67, tilt:0.38,
+      desc:'Modular QM/MM framework bridging ORCA/Gaussian with AMBER/DL_POLY. Used for enzyme active-site QM/MM geometry optimization and reaction mechanisms.',
+      use:'Enzyme QM/MM · Active Site Reactivity · QM/MM Optimisation' },
   ];
 
-  // Sun = CCMM Lab core
-  const SUN = TOOLS[0];
-
-  function resize(){
-    const rect = canvas.parentElement.getBoundingClientRect();
-    W = canvas.width  = rect.width  || 900;
-    H = canvas.height = Math.min(W * 0.56, 500);
-    canvas.style.height = H + 'px';
+  /* ── Star field: 3 layers ── */
+  let stars = [];
+  function buildStars(){
+    stars = [];
+    // Layer 1: tiny dim distant stars
+    for(let i=0;i<300;i++){
+      stars.push({ x:Math.random()*W, y:Math.random()*H,
+        r:Math.random()*0.7+0.2, base:Math.random()*0.35+0.1,
+        twinkleSpeed:Math.random()*0.03+0.005, phase:Math.random()*Math.PI*2, layer:0 });
+    }
+    // Layer 2: medium stars
+    for(let i=0;i<120;i++){
+      stars.push({ x:Math.random()*W, y:Math.random()*H,
+        r:Math.random()*1.1+0.6, base:Math.random()*0.5+0.25,
+        twinkleSpeed:Math.random()*0.04+0.01, phase:Math.random()*Math.PI*2, layer:1 });
+    }
+    // Layer 3: bright foreground stars with cross-glow
+    for(let i=0;i<30;i++){
+      stars.push({ x:Math.random()*W, y:Math.random()*H,
+        r:Math.random()*1.8+1.2, base:Math.random()*0.6+0.4,
+        twinkleSpeed:Math.random()*0.05+0.02, phase:Math.random()*Math.PI*2, layer:2 });
+    }
   }
 
   function drawStars(){
-    ctx.save();
-    for(let i=0;i<120;i++){
-      const sx = (i*137.5) % W;
-      const sy = (i*97.3)  % H;
-      const sr = (i%3===0)?1.2:(i%5===0)?0.8:0.5;
-      ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,255,255,${0.2+0.4*(i%3)/3})`;
+    stars.forEach(s=>{
+      const alpha = s.base + Math.sin(t * s.twinkleSpeed * 60 + s.phase) * s.base * 0.5;
+      ctx.save();
+      if(s.layer===2){
+        // cross spike for bright stars
+        ctx.strokeStyle=`rgba(255,255,255,${alpha*0.6})`;
+        ctx.lineWidth=0.5;
+        [-1,1].forEach(dir=>{
+          ctx.beginPath();
+          ctx.moveTo(s.x - s.r*3*dir, s.y);
+          ctx.lineTo(s.x + s.r*3*dir, s.y);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y - s.r*3*dir);
+          ctx.lineTo(s.x, s.y + s.r*3*dir);
+          ctx.stroke();
+        });
+      }
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${alpha})`;
       ctx.fill();
-    }
-    ctx.restore();
+      ctx.restore();
+    });
   }
 
-  function drawOrbitRing(r){
+  /* ── Nebula background glow blobs ── */
+  function drawNebula(){
+    const blobs = [
+      { x:W*0.15, y:H*0.25, r:W*0.18, c:'rgba(59,130,246,0.045)' },
+      { x:W*0.80, y:H*0.70, r:W*0.22, c:'rgba(139,92,246,0.04)'  },
+      { x:W*0.50, y:H*0.85, r:W*0.16, c:'rgba(16,185,129,0.035)' },
+      { x:W*0.70, y:H*0.15, r:W*0.14, c:'rgba(244,114,182,0.035)'},
+    ];
+    blobs.forEach(b=>{
+      const g = ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+      g.addColorStop(0, b.c);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.save();
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  /* ── Single orbit ring for each planet ── */
+  function drawOrbitRing(p, scale, isActive){
+    const rx = p.orbitR * scale;
+    const ry = p.orbitR * scale * p.tilt;
     ctx.save();
-    ctx.beginPath(); ctx.arc(W/2, H/2, r, 0, Math.PI*2);
-    ctx.strokeStyle='rgba(100,140,255,0.12)';
-    ctx.lineWidth=1; ctx.setLineDash([4,6]);
-    ctx.stroke(); ctx.setLineDash([]);
+    // Outer soft glow ring
+    ctx.beginPath();
+    ctx.ellipse(W/2, H/2, rx, ry, 0, 0, Math.PI*2);
+    ctx.strokeStyle = p.color + '18';
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    // Main visible ring
+    ctx.beginPath();
+    ctx.ellipse(W/2, H/2, rx, ry, 0, 0, Math.PI*2);
+    ctx.strokeStyle = isActive ? p.color + 'cc' : p.color + '70';
+    ctx.lineWidth = isActive ? 1.8 : 1.2;
+    ctx.setLineDash([6,4]);
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur  = isActive ? 10 : 4;
+    ctx.stroke();
+    ctx.setLineDash([]);
     ctx.restore();
   }
 
+  /* ── Sun ── */
   function drawSun(){
-    // Glow layers
-    [60,40,24].forEach((gr,i)=>{
-      const grd = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,gr);
-      grd.addColorStop(0,`rgba(255,220,80,${0.18-i*0.04})`);
-      grd.addColorStop(1,'rgba(255,180,0,0)');
-      ctx.beginPath(); ctx.arc(W/2,H/2,gr,0,Math.PI*2);
+    const cx=W/2, cy=H/2;
+    // Corona pulses
+    const corona = 32 + Math.sin(t*1.5)*4;
+    [corona+28, corona+14, corona].forEach((gr,i)=>{
+      const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,gr);
+      grd.addColorStop(0, `rgba(255,220,60,${0.22-i*0.055})`);
+      grd.addColorStop(0.6,`rgba(255,160,0,${0.06-i*0.015})`);
+      grd.addColorStop(1,  'rgba(255,100,0,0)');
+      ctx.beginPath(); ctx.arc(cx,cy,gr,0,Math.PI*2);
       ctx.fillStyle=grd; ctx.fill();
     });
     // Core
     ctx.save();
-    ctx.shadowColor='#ffd700'; ctx.shadowBlur=30;
-    ctx.beginPath(); ctx.arc(W/2,H/2,22,0,Math.PI*2);
-    ctx.fillStyle='#ffd700'; ctx.fill();
+    ctx.shadowColor='#ffd700'; ctx.shadowBlur=40;
+    const sg = ctx.createRadialGradient(cx-8,cy-8,2,cx,cy,corona);
+    sg.addColorStop(0,'#fff9c4');
+    sg.addColorStop(0.4,'#fde047');
+    sg.addColorStop(1,'#f59e0b');
+    ctx.beginPath(); ctx.arc(cx,cy,corona,0,Math.PI*2);
+    ctx.fillStyle=sg; ctx.fill();
     ctx.restore();
+    // Extra glow ring when sun is selected
+    if(sunSelected){
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx,cy,corona+18,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,220,60,0.6)';
+      ctx.lineWidth=2.5;
+      ctx.shadowColor='#ffd700'; ctx.shadowBlur=20;
+      ctx.stroke();
+      ctx.restore();
+    }
     // Label
     ctx.save();
-    ctx.fillStyle='#0a0e1f';
-    ctx.font='bold 9px Inter,sans-serif';
+    ctx.fillStyle='#1a0a00';
+    ctx.font='bold 10px Inter,sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('CCMM',W/2,H/2-3);
-    ctx.fillText('LAB',W/2,H/2+6);
+    ctx.fillText('CCMM',cx,cy-5);
+    ctx.fillText('LAB', cx,cy+7);
     ctx.restore();
   }
 
-  function getPlanetPos(tool){
-    if(!tool.orbitR) return {x:W/2, y:H/2};
+  /* ── Planet position (elliptical orbit) ── */
+  function getPos(p, scale){
     return {
-      x: W/2 + Math.cos(tool.angle) * tool.orbitR,
-      y: H/2 + Math.sin(tool.angle) * tool.orbitR * 0.45,
+      x: W/2 + Math.cos(p.angle) * p.orbitR * scale,
+      y: H/2 + Math.sin(p.angle) * p.orbitR * scale * p.tilt,
     };
   }
 
-  function drawPlanet(tool, hovered){
-    const pos = getPlanetPos(tool);
-    const pulse = hovered ? 4 : Math.sin(t*2 + tool.angle)*2;
-    const r = tool.r + pulse;
+  /* ── Draw one planet ── */
+  function drawPlanet(p, scale, isActive){
+    const pos = getPos(p, scale);
+    const pulse = isActive ? 5 : Math.sin(t*2.5 + p.angle)*1.5;
+    const r = p.r * scale + pulse;
 
-    // Orbit trail glow
+    // Atmosphere glow
     ctx.save();
-    ctx.shadowColor = tool.color; ctx.shadowBlur = hovered ? 28 : 14;
-    // Planet body
-    const grd = ctx.createRadialGradient(pos.x-r*0.3, pos.y-r*0.3, r*0.1, pos.x, pos.y, r);
-    grd.addColorStop(0, '#ffffff');
-    grd.addColorStop(0.3, tool.color);
-    grd.addColorStop(1, tool.color+'88');
+    const atm = ctx.createRadialGradient(pos.x, pos.y, r*0.5, pos.x, pos.y, r*2.2);
+    atm.addColorStop(0, p.glow+'55');
+    atm.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, r*2.2, 0, Math.PI*2);
+    ctx.fillStyle=atm; ctx.fill();
+    ctx.restore();
+
+    // Planet body — radial gradient for 3D look
+    ctx.save();
+    ctx.shadowColor=p.glow; ctx.shadowBlur = isActive ? 30 : 16;
+    const pg = ctx.createRadialGradient(pos.x-r*0.3, pos.y-r*0.35, r*0.05, pos.x, pos.y, r);
+    pg.addColorStop(0,  '#ffffff');
+    pg.addColorStop(0.25, p.color);
+    pg.addColorStop(0.7,  p.glow);
+    pg.addColorStop(1,    p.glow+'99');
     ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2);
-    ctx.fillStyle = grd; ctx.fill();
+    ctx.fillStyle=pg; ctx.fill();
     ctx.restore();
 
-    // Icon
+    // Icon on planet
     ctx.save();
-    ctx.font = `${Math.floor(r*0.9)}px serif`;
+    ctx.font=`${Math.floor(r*1.0)}px serif`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(tool.icon, pos.x, pos.y);
+    ctx.fillText(p.icon, pos.x, pos.y);
     ctx.restore();
 
-    // Name label below
+    // Name label
     ctx.save();
-    ctx.globalAlpha = hovered ? 1 : 0.85;
-    ctx.fillStyle = '#fff';
-    ctx.font = `${hovered?'bold ':''} 10px Inter,sans-serif`;
+    ctx.globalAlpha = isActive ? 1 : 0.82;
+    ctx.fillStyle = isActive ? p.color : '#ccddf5';
+    ctx.font = `${isActive?'bold ':''}${Math.max(9, Math.floor(11*scale))}px Inter,sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillText(tool.name, pos.x, pos.y + r + 5);
+    ctx.shadowColor = isActive ? p.glow : 'transparent';
+    ctx.shadowBlur  = isActive ? 8 : 0;
+    ctx.fillText(p.name, pos.x, pos.y + r + 5);
     ctx.restore();
-
-    return pos;
   }
 
-  let hoveredIdx = -1;
-  let selectedIdx = -1;
+  /* ── Resize: scale orbits to fit canvas ── */
+  function resize(){
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width  = rect.width  || 900;
+    // Height: enough to show outermost orbit (480 * 0.38 * 2 + margin)
+    H = canvas.height = Math.max(520, Math.min(Math.round(W * 0.62), 680));
+    canvas.style.height = H+'px';
+    buildStars();
+  }
 
-  function getHit(mx, my){
-    for(let i=1;i<TOOLS.length;i++){
-      const pos = getPlanetPos(TOOLS[i]);
+  function getScale(){
+    // scale so the outermost orbit (480) fits with padding
+    const maxOrbit = 480;
+    const maxFit   = Math.min(W, H) * 0.47;
+    return Math.min(1, maxFit / maxOrbit);
+  }
+
+  /* ── Hit testing ── */
+  let hoveredIdx=-1, selectedIdx=-1, sunSelected=false;
+
+  function hitSun(mx,my){
+    const dx=mx-W/2, dy=my-H/2;
+    return Math.sqrt(dx*dx+dy*dy) <= 40;
+  }
+
+  function getHit(mx,my){
+    const scale = getScale();
+    for(let i=0;i<PLANETS.length;i++){
+      const pos=getPos(PLANETS[i],scale);
       const dx=mx-pos.x, dy=my-pos.y;
-      if(Math.sqrt(dx*dx+dy*dy) <= TOOLS[i].r + 8) return i;
+      if(Math.sqrt(dx*dx+dy*dy) <= PLANETS[i].r*scale+12) return i;
     }
     return -1;
   }
 
-  function showPanel(idx){
-    const t = TOOLS[idx];
-    document.getElementById('swPanelIcon').textContent = t.icon;
-    document.getElementById('swPanelName').textContent = t.name;
-    document.getElementById('swPanelCat').textContent  = t.cat;
-    document.getElementById('swPanelCat').style.color  = t.catColor;
-    document.getElementById('swPanelDesc').textContent = t.desc;
-    document.getElementById('swPanelUse').textContent  = '🔧 ' + t.use;
+  function showSunPanel(){
+    document.getElementById('swPanelIcon').textContent = '🌟';
+    document.getElementById('swPanelName').textContent = 'CCMM Lab';
+    document.getElementById('swPanelCat').textContent  = 'Computational Chemistry & Molecular Modelling';
+    document.getElementById('swPanelCat').style.color  = '#fde047';
+    document.getElementById('swPanelDesc').textContent =
+      'We are the Computational Chemistry & Molecular Modelling Lab at Thapar Institute of Engineering & Technology, Patiala. Our research explores the quantum mechanical driving forces behind chemical reactivity — studying tunneling-controlled C–H activation, oriented external electric field effects on catalysis, and structure-based drug design. Using DFT, MD, QM/MM, Machine Learning, and Molecular Docking, we bridge atomic-scale quantum chemistry with real-world biological and catalytic problems. Led by Dr. Debashish Mandal (Top 2% Scientist, Elsevier), the lab brings together a multidisciplinary team of PhD scholars working at the cutting edge of theoretical and computational chemistry.';
+    document.getElementById('swPanelUse').textContent  =
+      '🏛️ Thapar University  ·  📊 H-Index: 29  ·  📚 Citations: 3330+';
     document.getElementById('swPanel').style.display   = 'block';
   }
 
-  canvas.addEventListener('mousemove', e=>{
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = W / rect.width;
-    const scaleY = H / rect.height;
-    hoveredIdx = getHit((e.clientX - rect.left)*scaleX, (e.clientY - rect.top)*scaleY);
-    canvas.style.cursor = hoveredIdx >= 0 ? 'pointer' : 'default';
-  });
-
-  canvas.addEventListener('click', e=>{
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = W / rect.width;
-    const scaleY = H / rect.height;
-    const hit = getHit((e.clientX - rect.left)*scaleX, (e.clientY - rect.top)*scaleY);
-    if(hit >= 0){ selectedIdx = hit; showPanel(hit); }
-  });
-
-  canvas.addEventListener('touchend', e=>{
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.changedTouches[0];
-    const scaleX = W / rect.width;
-    const scaleY = H / rect.height;
-    const hit = getHit((touch.clientX - rect.left)*scaleX, (touch.clientY - rect.top)*scaleY);
-    if(hit >= 0){ selectedIdx = hit; showPanel(hit); }
-  });
-
-  document.getElementById('swPanelClose').addEventListener('click', ()=>{
-    document.getElementById('swPanel').style.display='none';
-    selectedIdx=-1;
-  });
-
-  function tick(){
-    t += 0.016;
-    ctx.clearRect(0,0,W,H);
-
-    // Background
-    const bg = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.7);
-    bg.addColorStop(0,'#0d1535'); bg.addColorStop(1,'#050810');
-    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-
-    drawStars();
-
-    // Orbit rings
-    [110,190,270].forEach(r => drawOrbitRing(r));
-
-    // Update angles
-    for(let i=1;i<TOOLS.length;i++) TOOLS[i].angle += TOOLS[i].speed;
-
-    // Draw planets
-    for(let i=1;i<TOOLS.length;i++){
-      drawPlanet(TOOLS[i], i===hoveredIdx || i===selectedIdx);
-    }
-
-    drawSun();
-
-    // Hint text
-    ctx.save();
-    ctx.globalAlpha=0.4; ctx.fillStyle='#7090c0';
-    ctx.font='11px Inter,sans-serif'; ctx.textAlign='center';
-    ctx.fillText('Click any planet to explore the tool', W/2, H-14);
-    ctx.restore();
-
-    animId = requestAnimationFrame(tick);
+  function showPanel(i){
+    const p=PLANETS[i];
+    document.getElementById('swPanelIcon').textContent=p.icon;
+    document.getElementById('swPanelName').textContent=p.name;
+    document.getElementById('swPanelCat').textContent=p.cat;
+    document.getElementById('swPanelCat').style.color=p.catColor;
+    document.getElementById('swPanelDesc').textContent=p.desc;
+    document.getElementById('swPanelUse').textContent='🔧 '+p.use;
+    document.getElementById('swPanel').style.display='block';
   }
 
-  window.addEventListener('resize', ()=>{ resize(); });
+  canvas.addEventListener('mousemove',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(W/rect.width);
+    const my=(e.clientY-rect.top)*(H/rect.height);
+    hoveredIdx=getHit(mx,my);
+    canvas.style.cursor=(hoveredIdx>=0||hitSun(mx,my))?'pointer':'default';
+  });
+  canvas.addEventListener('click',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(W/rect.width);
+    const my=(e.clientY-rect.top)*(H/rect.height);
+    if(hitSun(mx,my)){ sunSelected=true; selectedIdx=-1; showSunPanel(); return; }
+    const hit=getHit(mx,my);
+    if(hit>=0){ selectedIdx=hit; sunSelected=false; showPanel(hit); }
+  });
+  canvas.addEventListener('touchend',e=>{
+    e.preventDefault();
+    const rect=canvas.getBoundingClientRect();
+    const touch=e.changedTouches[0];
+    const mx=(touch.clientX-rect.left)*(W/rect.width);
+    const my=(touch.clientY-rect.top)*(H/rect.height);
+    if(hitSun(mx,my)){ sunSelected=true; selectedIdx=-1; showSunPanel(); return; }
+    const hit=getHit(mx,my);
+    if(hit>=0){ selectedIdx=hit; sunSelected=false; showPanel(hit); }
+  });
+  document.getElementById('swPanelClose').addEventListener('click',()=>{
+    document.getElementById('swPanel').style.display='none';
+    selectedIdx=-1; sunSelected=false;
+  });
+
+  /* ── Main loop ── */
+  function tick(){
+    t+=0.016;
+    ctx.clearRect(0,0,W,H);
+
+    // Deep space background
+    const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.75);
+    bg.addColorStop(0,'#0d1535'); bg.addColorStop(0.5,'#080e22'); bg.addColorStop(1,'#030509');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+    drawNebula();
+    drawStars();
+
+    const scale=getScale();
+
+    // Draw all orbit rings first (behind planets)
+    PLANETS.forEach((p,i)=>drawOrbitRing(p,scale,i===hoveredIdx||i===selectedIdx));
+
+    // Update angles and draw planets
+    PLANETS.forEach((p,i)=>{
+      p.angle+=p.speed;
+      drawPlanet(p,scale,i===hoveredIdx||i===selectedIdx);
+    });
+
+    // Sun on top
+    drawSun();
+
+    // Hint
+    ctx.save();
+    ctx.globalAlpha=0.35; ctx.fillStyle='#6080b0';
+    ctx.font='11px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('✦  Click any planet or the Sun to explore  ✦', W/2, H-12);
+    ctx.restore();
+
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize',()=>{resize();});
   resize();
   tick();
 })();
